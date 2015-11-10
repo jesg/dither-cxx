@@ -18,6 +18,7 @@
 #include <unordered_map>
 #include "combinations.h"
 #include "dither_types.h"
+#include "constraint_handler.h"
 
 namespace dither {
 
@@ -33,9 +34,11 @@ class Ipog {
   std::unordered_map<std::string, int> param_index_;
   std::unordered_map<int, std::string> reverse_param_index_;
   dtest_case merge_scratch_;
+  BaseConstraintHandler *constraint_handler = NULL;
 
  public:
   Ipog();
+  ~Ipog();
   Ipog(const unsigned char);
   void set_t(const int t) { t_ = t; }
   void add_parameter(const std::string, const int[], const int);

@@ -16,13 +16,20 @@
 
 namespace dither {
 
-Ipog::Ipog() { t_ = 2; }
-
-Ipog::Ipog(const unsigned char t) {
-  t_ = t;
+Ipog::~Ipog() {
+  if (constraint_handler != NULL) {
+    delete constraint_handler;
+  }
 }
 
+Ipog::Ipog() { t_ = 2; }
+
+Ipog::Ipog(const unsigned char t) { t_ = t; }
+
 void Ipog::init_bound() {
+  if (constraint_handler == NULL) {
+    constraint_handler = new BaseConstraintHandler();
+  }
   using dither::product;
   dtest_case tmp;
 
@@ -68,15 +75,24 @@ void Ipog::run() {
   for (auto k = t_; k < input_params_.size(); k++) {
     std::forward_list<std::vector<param>> pi = cover(k);
 
-    for (auto it = bound_.begin(); it != bound_.cend(); ++it) {
-      dtest_case &test_case = *it;
-      maximize_coverage(k, test_case, pi);
+    {
+      auto prev = bound_.cbefore_begin();
+      auto next = bound_.begin();
+      auto end = bound_.cend();
+      while(next != end) {
+        if(maximize_coverage(k, *next, pi) == -1) {
+          next = bound_.erase_after(prev);
+        } else {
+          ++prev;
+          ++next;
+        }
+      }
     }
 
     /* vertical extension */
     for (auto pairs = pi.cbegin(); pairs != pi.cend(); ++pairs) {
       const std::vector<param> &test_case = *pairs;
-      bool case_covered = false;
+      bool case_covered = constraint_handler->violate_constraints(test_case);
       for (auto it = bound_.cbegin(); it != bound_.cend(); ++it) {
         if (is_covered(*it, test_case)) {
           case_covered = true;
@@ -118,7 +134,9 @@ void Ipog::run() {
           for (auto it = test_case.cbegin(); it != test_case.cend(); ++it) {
             unbound_test_case[(*it).first] = (*it).second;
           }
-          unbound_.push_front(unbound_test_case);
+          if (!constraint_handler->violate_constraints(unbound_test_case)) {
+            unbound_.push_front(unbound_test_case);
+          }
         }
       }
     }
@@ -141,7 +159,9 @@ inline const int Ipog::merge(const int k, dtest_case &test_case,
     merge_scratch_[(*it).first] = (*it).second;
   }
 
-  /* TODO validate constraints */
+  if (constraint_handler->violate_constraints(merge_scratch_)) {
+    return -1;
+  }
 
   for (auto it = pairs.cbegin(); it != pairs.cend(); ++it) {
     test_case[(*it).first] = (*it).second;
@@ -169,7 +189,7 @@ inline bool Ipog::is_covered(const dtest_case &test_case,
 const int Ipog::maximize_coverage(const int k, dtest_case &test_case,
                                   std::forward_list<std::vector<param>> &pi) {
   const std::vector<param> &param_range = param_cache_[k];
-  int current_max = 0;
+  int current_max = -1;
   param max_param = param_range[0];
   std::forward_list<std::forward_list<std::vector<param>>::iterator> covered;
 
@@ -179,22 +199,29 @@ const int Ipog::maximize_coverage(const int k, dtest_case &test_case,
     const param current_param = *it;
 
     test_case[current_param.first] = current_param.second;
-    int count = 0;
-    auto prev = pi.before_begin();
-    for (auto params = pi.cbegin(); params != pi.cend(); ++params) {
-      if (is_covered(test_case, *params)) {
-        tmp_covered.push_front(prev);
-        count++;
+    if (!constraint_handler->violate_constraints(test_case)) {
+      int count = 0;
+      auto prev = pi.before_begin();
+      for (auto params = pi.cbegin(); params != pi.cend(); ++params) {
+        if (is_covered(test_case, *params)) {
+          tmp_covered.push_front(prev);
+          count++;
+        }
+        ++prev;
       }
-      ++prev;
-    }
 
-    if (count > current_max) {
-      current_max = count;
-      max_param = current_param;
-      covered = tmp_covered;
+      if (count > current_max) {
+        current_max = count;
+        max_param = current_param;
+        covered = tmp_covered;
+      }
     }
     test_case[current_param.first] = -1;
+  }
+
+  if (current_max == -1) {
+    /* TODO erase element */
+    return -1;
   }
 
   /* remove covered */
@@ -240,19 +267,25 @@ void Ipog::add_parameter(const std::string name) {
 void Ipog::init_param_cache() {
   std::vector<std::tuple<std::string, int, int>> tmp;
   for (auto it = int_params_.cbegin(); it != int_params_.cend(); ++it) {
-    if((*it).second.size() < 1) { continue; }
+    if ((*it).second.size() < 1) {
+      continue;
+    }
     tmp.push_back(
         std::make_tuple((*it).first, DITHER_INT_T, (*it).second.size()));
   }
 
   for (auto it = str_params_.cbegin(); it != str_params_.cend(); ++it) {
-    if((*it).second.size() < 1) { continue; }
+    if ((*it).second.size() < 1) {
+      continue;
+    }
     tmp.push_back(
         std::make_tuple((*it).first, DITHER_STRING_T, (*it).second.size()));
   }
 
   for (auto it = bool_params_.cbegin(); it != bool_params_.cend(); ++it) {
-    if((*it).second.size() < 1) { continue; }
+    if ((*it).second.size() < 1) {
+      continue;
+    }
     tmp.push_back(
         std::make_tuple((*it).first, DITHER_BOOL_T, (*it).second.size()));
   }
@@ -293,7 +326,7 @@ int Ipog::size() {
 
 std::string *Ipog::header() {
   std::string *result = new std::string[param_cache_.size()];
-  for(int i = 0; i< param_cache_.size(); i++) {
+  for (int i = 0; i < param_cache_.size(); i++) {
     result[i] = reverse_param_index_[i];
   }
   return result;

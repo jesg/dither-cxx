@@ -34,7 +34,9 @@ class Ipog {
   std::unordered_map<std::string, int> param_index_;
   std::unordered_map<int, std::string> reverse_param_index_;
   dtest_case merge_scratch_;
-  BaseConstraintHandler *constraint_handler = NULL;
+  BaseConstraintHandler* constraint_handler;
+  std::vector<std::vector<int>> constraints;
+  std::vector<int> ranges;
 
  public:
   Ipog();
@@ -49,10 +51,12 @@ class Ipog {
   void run();
   int size();
   std::string *header();
+  void ground_solutions();
   inline bool is_valid() { return t_ <= param_cache_.size(); }
   std::forward_list<std::vector<param>> cover(int);
   const int maximize_coverage(const int, dtest_case &,
                               std::forward_list<std::vector<param>> &);
+  void add_constraint(const int[], const int);
   inline bool is_covered(const dtest_case &test_case,
                          const std::vector<param> &params);
   inline bool is_covered(const std::vector<param> &params);
@@ -98,6 +102,7 @@ class Ipog {
     std::cout << std::endl;
   }
 };
+
 }
 
 #endif

@@ -30,5 +30,6 @@ int dither_ipog_size(ipog_handle);
 void dither_ipog_display_raw_solution(ipog_handle);
 std::string* dither_ipog_header(ipog_handle);
 void dither_ipog_delete(ipog_handle self);
+void dither_add_constraint(ipog_handle self, const int[], const int );
 }
 #endif  // DITHER_H_

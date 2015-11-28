@@ -17,19 +17,20 @@
 namespace dither {
 
 Ipog::~Ipog() {
-  if (constraint_handler != NULL) {
+  if(constraint_handler != NULL) {
     delete constraint_handler;
   }
 }
 
-Ipog::Ipog() { t_ = 2; }
+Ipog::Ipog() {
+  t_ = 2;
+}
 
-Ipog::Ipog(const unsigned char t) { t_ = t; }
+Ipog::Ipog(const unsigned char t) {
+  t_ = t;
+}
 
 void Ipog::init_bound() {
-  if (constraint_handler == NULL) {
-    constraint_handler = new BaseConstraintHandler();
-  }
   using dither::product;
   dtest_case tmp;
 
@@ -38,6 +39,17 @@ void Ipog::init_bound() {
   for (auto it = bound_.begin(); it != bound_.end(); ++it) {
     (*it).resize(size, -1);
     (*it).shrink_to_fit();
+  }
+
+  merge_scratch_.resize(param_cache_.size(), -1);
+
+  if(constraints.size() > 0) {
+    for(auto it = param_cache_.cbegin(); it != param_cache_.cend(); ++it) {
+      ranges.push_back((*it).size() - 1);
+    }
+    constraint_handler = new GecodeConstraintHandler(ranges, constraints);
+  } else {
+    constraint_handler = new BaseConstraintHandler();
   }
 }
 
@@ -79,8 +91,8 @@ void Ipog::run() {
       auto prev = bound_.cbefore_begin();
       auto next = bound_.begin();
       auto end = bound_.cend();
-      while(next != end) {
-        if(maximize_coverage(k, *next, pi) == -1) {
+      while (next != end) {
+        if (maximize_coverage(k, *next, pi) == -1) {
           next = bound_.erase_after(prev);
         } else {
           ++prev;
@@ -93,61 +105,51 @@ void Ipog::run() {
     for (auto pairs = pi.cbegin(); pairs != pi.cend(); ++pairs) {
       const std::vector<param> &test_case = *pairs;
       bool case_covered = constraint_handler->violate_constraints(test_case);
-      for (auto it = bound_.cbegin(); it != bound_.cend(); ++it) {
-        if (is_covered(*it, test_case)) {
-          case_covered = true;
-          break;
-        }
-      }
 
-      if (!case_covered) {
-        for (auto it = unbound_.cbegin(); it != unbound_.cend(); ++it) {
-          if (is_covered(*it, test_case)) {
-            case_covered = true;
-            break;
-          }
-        }
-      }
+			if (!case_covered) {
+				bool is_merged = false;
+				auto prev = unbound_.before_begin();
+				auto next = unbound_.begin();
+				auto end = unbound_.end();
+				while (next != end) {
+          int b = (*next)[0];
+					const int merge_result = merge(k, *next, test_case);
+					if (merge_result == 0) {
+						bound_.push_front(*next);
+						unbound_.erase_after(prev);
+						is_merged = true;
+						break;
+					} else if (merge_result == 1) {
+						is_merged = true;
+						break;
+					}
+					++prev;
+					++next;
+				}
 
-      if (!case_covered) {
-        bool is_merged = false;
-        auto prev = unbound_.cbefore_begin();
-        auto next = unbound_.begin();
-        auto end = unbound_.cend();
-        while (next != end) {
-          const int merge_result = merge(k, *next, test_case);
-          if (merge_result == 0) {
-            bound_.push_front(*next);
-            unbound_.erase_after(prev);
-            is_merged = true;
-            break;
-          } else if (merge_result == 1) {
-            is_merged = true;
-            break;
-          }
-          ++prev;
-          ++next;
-        }
+				if (!is_merged) {
+					dtest_case unbound_test_case(param_cache_.size(), -1);
+					for (auto it = test_case.cbegin(); it != test_case.cend(); ++it) {
+						unbound_test_case[(*it).first] = (*it).second;
+					}
+					if (!constraint_handler->violate_constraints(unbound_test_case)) {
+						unbound_.push_front(unbound_test_case);
+					}
+				}
+			}
 
-        if (!is_merged) {
-          dtest_case unbound_test_case(param_cache_.size(), -1);
-          for (auto it = test_case.cbegin(); it != test_case.cend(); ++it) {
-            unbound_test_case[(*it).first] = (*it).second;
-          }
-          if (!constraint_handler->violate_constraints(unbound_test_case)) {
-            unbound_.push_front(unbound_test_case);
-          }
-        }
-      }
     }
   }
+  ground_solutions();
 }
 
 /* -1 no merge, 0 perfect merge (no unbound), 1 partial merge */
 inline const int Ipog::merge(const int k, dtest_case &test_case,
-                             const std::vector<param> &pairs) {
+    const std::vector<param> &pairs) {
   for (auto it = pairs.cbegin(); it != pairs.cend(); ++it) {
     auto value = test_case[(*it).first];
+    int s = (*it).second;
+    int v = value;
     if (!(value == -1 || value == (*it).second)) {
       return -1;
     }
@@ -177,7 +179,7 @@ inline const int Ipog::merge(const int k, dtest_case &test_case,
 }
 
 inline bool Ipog::is_covered(const dtest_case &test_case,
-                             const std::vector<param> &params) {
+    const std::vector<param> &params) {
   for (auto param = params.cbegin(); param != params.cend(); ++param) {
     if (test_case[(*param).first] != (*param).second) {
       return false;
@@ -187,7 +189,7 @@ inline bool Ipog::is_covered(const dtest_case &test_case,
 }
 
 const int Ipog::maximize_coverage(const int k, dtest_case &test_case,
-                                  std::forward_list<std::vector<param>> &pi) {
+    std::forward_list<std::vector<param>> &pi) {
   const std::vector<param> &param_range = param_cache_[k];
   int current_max = -1;
   param max_param = param_range[0];
@@ -195,7 +197,7 @@ const int Ipog::maximize_coverage(const int k, dtest_case &test_case,
 
   for (auto it = param_range.cbegin(); it != param_range.cend(); ++it) {
     std::forward_list<std::forward_list<std::vector<param>>::iterator>
-        tmp_covered;
+      tmp_covered;
     const param current_param = *it;
 
     test_case[current_param.first] = current_param.second;
@@ -220,7 +222,6 @@ const int Ipog::maximize_coverage(const int k, dtest_case &test_case,
   }
 
   if (current_max == -1) {
-    /* TODO erase element */
     return -1;
   }
 
@@ -234,24 +235,21 @@ const int Ipog::maximize_coverage(const int k, dtest_case &test_case,
 }
 
 void Ipog::display_raw_solution() {
-  display_header();
+  /* display_header(); */
   for (auto it = bound_.cbegin(); it != bound_.cend(); ++it) {
-    display_test_case(*it);
-  }
-  for (auto it = unbound_.cbegin(); it != unbound_.cend(); ++it) {
     display_test_case(*it);
   }
 }
 
 void Ipog::add_parameter(const std::string name, const int *terms,
-                         const int terms_length) {
+    const int terms_length) {
   std::vector<int> tmp(terms, terms + terms_length);
   std::pair<std::string, std::vector<int>> key_value(name, tmp);
   int_params_.insert(key_value);
 }
 
 void Ipog::add_parameter(const std::string name, const std::string *terms,
-                         const int terms_length) {
+    const int terms_length) {
   std::vector<std::string> tmp(terms, terms + terms_length);
   std::pair<std::string, std::vector<std::string>> key_value(name, tmp);
   str_params_.insert(key_value);
@@ -271,7 +269,7 @@ void Ipog::init_param_cache() {
       continue;
     }
     tmp.push_back(
-        std::make_tuple((*it).first, DITHER_INT_T, (*it).second.size()));
+	std::make_tuple((*it).first, DITHER_INT_T, (*it).second.size()));
   }
 
   for (auto it = str_params_.cbegin(); it != str_params_.cend(); ++it) {
@@ -279,7 +277,7 @@ void Ipog::init_param_cache() {
       continue;
     }
     tmp.push_back(
-        std::make_tuple((*it).first, DITHER_STRING_T, (*it).second.size()));
+	std::make_tuple((*it).first, DITHER_STRING_T, (*it).second.size()));
   }
 
   for (auto it = bool_params_.cbegin(); it != bool_params_.cend(); ++it) {
@@ -287,11 +285,11 @@ void Ipog::init_param_cache() {
       continue;
     }
     tmp.push_back(
-        std::make_tuple((*it).first, DITHER_BOOL_T, (*it).second.size()));
+	std::make_tuple((*it).first, DITHER_BOOL_T, (*it).second.size()));
   }
 
   std::sort(tmp.begin(), tmp.end(), [](std::tuple<std::string, int, int> a,
-                                       std::tuple<std::string, int, int> b) {
+        std::tuple<std::string, int, int> b) {
     return std::get<2>(a) > std::get<2>(b);
   });
 
@@ -331,4 +329,36 @@ std::string *Ipog::header() {
   }
   return result;
 }
+
+  void Ipog::add_constraint(const int* constraint, const int length) {
+    if(length != param_cache_.size()) {
+      std::cerr << "Warning: dither constraint length does not equal params length" << std::endl;
+      return;
+    }
+    std::vector<int> tmp(length);
+    std::copy(constraint, constraint+length, tmp.begin());
+    constraints.push_back(tmp);
+  }
+
+void Ipog::ground_solutions() {
+  auto prev = bound_.cbefore_begin();
+  auto next = bound_.begin();
+  auto end = bound_.cend();
+  while (next != end) {
+    if (constraint_handler->violate_constraints(*next)) {
+      next = bound_.erase_after(prev);
+    } else {
+      ++prev;
+      ++next;
+    }
+  }
+
+  while(!unbound_.empty()) {
+    dtest_case first = unbound_.front();
+    if(constraint_handler->ground(first)) {
+      bound_.push_front(first);
+    }
+    unbound_.pop_front();
+  }
+  }
 }

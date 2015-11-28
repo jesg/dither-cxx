@@ -21,5 +21,15 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
+find_path(GECODE_INCLUDE_DIR gecode/search.hh)
+set(GECODE_INCLUDE_DIRS ${GECODE_INCLUDE_DIR})
+
+foreach (module flatzinc driver search minimodel set int kernel support)
+  set(var GECODE_${module}_LIBRARY)
+  find_library(${var} gecode${module})
+  set(GECODE_LIBRARIES ${GECODE_LIBRARIES} ${${var}})
+  set(GECODE_LIBRARY_VARS ${GECODE_LIBRARY_VARS} ${var})
+endforeach ()
+
 add_subdirectory(src)
 add_subdirectory(tests)

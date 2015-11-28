@@ -53,3 +53,7 @@ void dither_ipog_display_raw_solution(ipog_handle self) {
 std::string *dither_ipog_header(ipog_handle self) {
   return static_cast<dither::Ipog *>(self)->header();
 }
+
+void dither_add_constraint(ipog_handle self, const int constraint[], const int length) {
+  static_cast<dither::Ipog *>(self)->add_constraint(constraint, length);
+}

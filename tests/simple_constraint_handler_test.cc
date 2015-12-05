@@ -12,7 +12,7 @@
 #include <vector>
 
 TEST(SimpleConstraintHandlerTest, canCreate) {
-  std::vector<int> arr;
+  std::vector<dither::dval> arr;
   arr.push_back(2);
   arr.push_back(3);
   arr.push_back(4);
@@ -28,7 +28,7 @@ TEST(SimpleConstraintHandlerTest, canCreate) {
 }
 
 TEST(SimpleConstraintHandlerTest, canTestCaseViolateConstraint) {
-  std::vector<int> arr;
+  std::vector<dither::dval> arr;
   arr.push_back(2);
   arr.push_back(3);
   arr.push_back(4);
@@ -60,7 +60,7 @@ TEST(SimpleConstraintHandlerTest, canTestCaseViolateConstraint) {
 }
 
 TEST(SimpleConstraintHandlerTest, canParamsViolateConstraint) {
-  std::vector<int> arr;
+  std::vector<dither::dval> arr;
   arr.push_back(2);
   arr.push_back(3);
   arr.push_back(4);
@@ -96,7 +96,7 @@ TEST(SimpleConstraintHandlerTest, canParamsViolateConstraint) {
 }
 
 TEST(SimpleConstraintHandlerTest, canGroundTestCase) {
-  std::vector<int> arr;
+  std::vector<dither::dval> arr;
   arr.push_back(2);
   arr.push_back(3);
   arr.push_back(4);
@@ -144,7 +144,7 @@ TEST(SimpleConstraintHandlerTest, canGroundTestCase) {
 
 
 TEST(GecodeCompatibilityConstraintTest, canValidateGecodeConstraintOnTestCase) {
-  std::vector<int> arr;
+  std::vector<dither::dval> arr;
   arr.push_back(2);
   arr.push_back(3);
   arr.push_back(4);
@@ -171,7 +171,7 @@ TEST(GecodeCompatibilityConstraintTest, canValidateGecodeConstraintOnTestCase) {
 }
 
 TEST(GecodeCompatibilityConstraintTest, canValidateGecodeConstraintOnParams) {
-  std::vector<int> arr;
+  std::vector<dither::dval> arr;
   arr.push_back(2);
   arr.push_back(3);
   arr.push_back(4);
@@ -211,7 +211,7 @@ TEST(GecodeCompatibilityConstraintTest, canValidateGecodeConstraintOnParams) {
 }
 
 TEST(GecodeCompatibilityConstraintTest, canGroundSimpleConstraintOnTestCase) {
-  std::vector<int> arr;
+  std::vector<dither::dval> arr;
   arr.push_back(2);
   arr.push_back(3);
   arr.push_back(4);

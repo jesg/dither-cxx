@@ -10,31 +10,30 @@
 #ifndef CONSTRAINT_HANDLER_H_
 #define CONSTRAINT_HANDLER_H_
 
-#include <vector>
-#include "dither_types.h"
+#include "base_constraint_handler.h"
 #include <gecode/int.hh>
 #include <gecode/minimodel.hh>
 #include <gecode/search.hh>
 
 namespace dither {
 
-class BaseConstraintHandler {
- public:
-  BaseConstraintHandler(){};
-  ~BaseConstraintHandler(){};
-   virtual bool violate_constraints(const dtest_case &test_case) { return false; }
-   virtual bool violate_constraints(const std::vector<param> &test_case) {
-    return false;
-  }
-   virtual bool ground(dtest_case &test_case) {
-    for (auto it = test_case.begin(); it != test_case.end(); ++it) {
-      if ((*it) == -1) {
-        *it = 0;
-      }
-    }
-    return true;
-  }
-};
+/* class BaseConstraintHandler { */
+/*  public: */
+/*   BaseConstraintHandler(){}; */
+/*   ~BaseConstraintHandler(){}; */
+/*    virtual bool violate_constraints(const dtest_case &test_case) { return false; } */
+/*    virtual bool violate_constraints(const std::vector<param> &test_case) { */
+/*     return false; */
+/*   } */
+/*    virtual bool ground(dtest_case &test_case) { */
+/*     for (auto it = test_case.begin(); it != test_case.end(); ++it) { */
+/*       if ((*it) == -1) { */
+/*         *it = 0; */
+/*       } */
+/*     } */
+/*     return true; */
+/*   } */
+/* }; */
 
 class GecodeConstraintSpace : public Gecode::Space {
 
@@ -54,7 +53,7 @@ class GecodeConstraintSpace : public Gecode::Space {
         bool not_set = true;
 
         auto values = *it;
-        for(unsigned int i = 0; i < vars_.size(); i++) {
+        for(std::size_t i = 0; i < vars_.size(); i++) {
           if(values[i] == -1) continue;
           if(not_set) {
             not_set = false;

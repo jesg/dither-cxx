@@ -11,9 +11,9 @@
 
 namespace dither {
 
-  SimpleConstraintHandler::SimpleConstraintHandler(std::vector<int>& ranges, std::vector<std::vector<dval>>& pconstraints) : params(ranges) {
+  SimpleConstraintHandler::SimpleConstraintHandler(std::vector<dval>& ranges, std::vector<std::vector<dval>>& pconstraints) : params(ranges) {
     for(auto it = pconstraints.cbegin(); it != pconstraints.cend(); ++it) {
-      std::vector<std::pair<int, dval>> constraint;
+      std::vector<std::pair<std::size_t, dval>> constraint;
       int i = 0;
       for(auto iit = (*it).cbegin(); iit != (*it).cend(); ++iit, i++) {
         if((*iit) != -1) {
@@ -22,7 +22,7 @@ namespace dither {
       }
       constraints.push_back(constraint);
     }
-    std::sort(constraints.begin(), constraints.end(), [](std::vector<std::pair<int, dval>>& a, std::vector<std::pair<int, dval>>& b) { return a.size() < b.size(); });
+    std::sort(constraints.begin(), constraints.end(), [](std::vector<std::pair<std::size_t, dval>>& a, std::vector<std::pair<std::size_t, dval>>& b) { return a.size() < b.size(); });
   }
 
   bool SimpleConstraintHandler::violate_constraints(const dtest_case &test_case) {
@@ -34,7 +34,7 @@ namespace dither {
     return false;
   }
 
-  inline bool SimpleConstraintHandler::violate_constraint(const dtest_case& test_case, const std::vector<std::pair<int, dval>>& constraint) {
+  inline bool SimpleConstraintHandler::violate_constraint(const dtest_case& test_case, const std::vector<std::pair<std::size_t, dval>>& constraint) {
     for(auto it = constraint.cbegin(); it != constraint.cend(); ++it) {
       auto value = test_case[(*it).first];
       if(value == -1 || value != (*it).second) {
@@ -53,12 +53,12 @@ namespace dither {
     return false;
   }
 
-  inline bool SimpleConstraintHandler::violate_constraint(const std::vector<param>& test_case, const std::vector<std::pair<int, dval>>& constraint) {
+  inline bool SimpleConstraintHandler::violate_constraint(const std::vector<param>& test_case, const std::vector<std::pair<std::size_t, dval>>& constraint) {
     if(test_case.size() < constraint.size()) {
       return false;
     }
 
-    int count = 0;
+    std::size_t count = 0;
     for(auto it = constraint.cbegin(); it != constraint.cend(); ++it) {
       for(auto iit = test_case.cbegin(); iit != test_case.cend(); ++iit) {
         if((*iit).first == (*it).first && (*iit).second == (*it).second) {

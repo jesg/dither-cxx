@@ -10,6 +10,8 @@
 #ifndef DITHER_TYPES_H_
 #define DITHER_TYPES_H_
 
+#include <string>
+
 namespace dither {
 
 typedef signed char dval;

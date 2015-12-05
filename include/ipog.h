@@ -63,6 +63,7 @@ class Ipog {
   inline bool is_covered(const std::vector<param> &params);
   inline const int merge(const int, dtest_case &, const std::vector<param> &);
   void display_raw_solution();
+  void fill(int[]);
   inline void display_header() {
     for (std::size_t i = 0; i < param_cache_.size();) {
       std::cout << reverse_param_index_[i];

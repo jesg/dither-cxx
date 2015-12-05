@@ -18,14 +18,11 @@
 #include <algorithm>
 
 TEST(IpogTest, 2Way) {
-  std::string people[] = {"bill", "joe", "jane"};
   int nums[] = {1, 2, 3, 4};
-  ipog_handle ipog = dither_ipog_new();
-  dither_ipog_set_t(ipog, 2);
-  dither_ipog_add_parameter_int(ipog, "nums", nums, 4);
-  dither_ipog_add_parameter_enum(ipog, "people", people, 3);
-  dither_ipog_add_parameter(ipog, "on");
-  dither_ipog_init_param_cache(ipog);
+  ipog_handle ipog = dither_ipog_new(2);
+  dither_ipog_add_parameter_int(ipog, 0, nums, 4);
+  dither_ipog_add_parameter_int(ipog, 1, nums, 3);
+  dither_ipog_add_parameter_int(ipog, 2, nums, 2);
   dither_ipog_run(ipog);
   dither_ipog_display_raw_solution(ipog);
   std::cout << dither_ipog_size(ipog) << std::endl;
@@ -35,16 +32,12 @@ TEST(IpogTest, 2Way) {
 
 
 TEST(IpogTest, 3Way) {
-  std::string people[] = {"bill", "joe", "jane"};
-  int nums[] = {1, 2, 3, 4};
-  int nums2[] = {1, 2, 3, 4, 5, 6};
-  ipog_handle ipog = dither_ipog_new();
-  dither_ipog_set_t(ipog, 3);
-  dither_ipog_add_parameter_int(ipog, "nums", nums, 4);
-  dither_ipog_add_parameter_int(ipog, "nums2", nums2, 6);
-  dither_ipog_add_parameter_enum(ipog, "people", people, 3);
-  dither_ipog_add_parameter(ipog, "on");
-  dither_ipog_init_param_cache(ipog);
+  int nums[] = {1, 2, 3, 4, 5, 6};
+  ipog_handle ipog = dither_ipog_new(3);
+  dither_ipog_add_parameter_int(ipog, 0, nums, 4);
+  dither_ipog_add_parameter_int(ipog, 1, nums, 6);
+  dither_ipog_add_parameter_int(ipog, 2, nums, 3);
+  dither_ipog_add_parameter_int(ipog, 3, nums, 2);
   dither_ipog_run(ipog);
   dither_ipog_display_raw_solution(ipog);
   std::cout << dither_ipog_size(ipog) << std::endl;
@@ -53,14 +46,11 @@ TEST(IpogTest, 3Way) {
 }
 
 TEST(IpogTest, 2WayWithConstraintsExcludeSubCombination) {
-  std::string people[] = {"bill", "joe", "jane"};
   int nums[] = {1, 2, 3, 4};
-  ipog_handle ipog = dither_ipog_new();
-  dither_ipog_set_t(ipog, 2);
-  dither_ipog_add_parameter_int(ipog, "nums", nums, 4);
-  dither_ipog_add_parameter_enum(ipog, "people", people, 3);
-  dither_ipog_add_parameter(ipog, "on");
-  dither_ipog_init_param_cache(ipog);
+  ipog_handle ipog = dither_ipog_new(2);
+  dither_ipog_add_parameter_int(ipog, 0, nums, 4);
+  dither_ipog_add_parameter_int(ipog, 1, nums, 3);
+  dither_ipog_add_parameter_int(ipog, 2, nums, 2);
 
   int constraint[] = {0, 1, -1};
   int constraint2[] = {0, 0, -1};
@@ -76,26 +66,22 @@ TEST(IpogTest, 2WayWithConstraintsExcludeSubCombination) {
 }
 
 TEST(IpogTest, 3WayTCAS) {
-  std::string people[] = {"bill", "joe", "jane"};
   int nums[] = {1, 2, 3, 4};
-  ipog_handle ipog = dither_ipog_new();
-  dither_ipog_set_t(ipog, 3);
-  dither_ipog_add_parameter_int(ipog, "nums", nums, 4);
+  ipog_handle ipog = dither_ipog_new(3);
+  dither_ipog_add_parameter_int(ipog, 0, nums, 4);
   for(unsigned int i = 0; i < 7; i++) {
-    dither_ipog_add_parameter(ipog, "b" + i);
+    dither_ipog_add_parameter_int(ipog, i+1, nums, 2);
   }
   for(unsigned int i = 0; i < 3; i++) {
-    dither_ipog_add_parameter_enum(ipog, "s3-" + i, people, 3);
+    dither_ipog_add_parameter_int(ipog, 7+i, nums, 3);
   }
   int ten[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   for(unsigned int i = 0; i < 2; i++) {
-    dither_ipog_add_parameter_int(ipog, "i10-" + i, ten, 10);
+    dither_ipog_add_parameter_int(ipog, 10+i, ten, 10);
   }
-  dither_ipog_init_param_cache(ipog);
 
   dither_ipog_run(ipog);
-  std::cout << dither_ipog_size(ipog) << std::endl;
-  ASSERT_EQ (dither_ipog_size(ipog), 416);
+  ASSERT_EQ (dither_ipog_size(ipog), 405);
   dither_ipog_delete(ipog);
 }
 

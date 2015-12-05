@@ -329,10 +329,6 @@ std::string *Ipog::header() {
 }
 
   void Ipog::add_constraint(const int* constraint, const unsigned int length) {
-    if(length != param_cache_.size()) {
-      std::cerr << "Warning: dither constraint length does not equal params length" << std::endl;
-      return;
-    }
     std::vector<dval> tmp(length);
     std::copy(constraint, constraint+length, tmp.begin());
     for(auto it = tmp.cbegin(); it != tmp.cend(); ++it) {
@@ -367,4 +363,13 @@ void Ipog::ground_solutions() {
     unbound_.pop_front();
   }
   }
+
+void Ipog::fill(int *solution) {
+  std::size_t i = 0;
+  for(auto it = bound_.cbegin(); it != bound_.cend(); ++it) {
+    for(auto iit = (*it).cbegin(); iit != (*it).cend(); ++iit, i++) {
+      solution[i] = *iit;
+    }
+  }
+}
 }

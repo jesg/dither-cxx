@@ -1,0 +1,37 @@
+/*
+ *
+ * Copyright (C) 2015 Jason Gowan
+ * All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the BSD license.  See the LICENSE file for details.
+ */
+
+#ifndef SIMPLE_CONSTRAINT_HANDLER_H_
+#define SIMPLE_CONSTRAINT_HANDLER_H_
+
+#include <vector>
+#include <utility>
+#include "dither_types.h"
+#include "constraint_handler.h"
+
+namespace dither {
+
+  class SimpleConstraintHandler : public BaseConstraintHandler {
+    protected:
+      std::vector<std::vector<std::pair<int, dval>>> constraints;
+      std::vector<int> params;
+
+      inline bool violate_constraint(const dtest_case& test_case, const std::vector<std::pair<int, dval>>& constraint);
+      inline bool violate_constraint(const std::vector<param>& test_case, const std::vector<std::pair<int, dval>>& constraint);
+
+    public:
+      SimpleConstraintHandler(std::vector<int>& ranges, std::vector<std::vector<dval>>& pconstraints);
+      bool violate_constraints(const dtest_case &test_case);
+      bool violate_constraints(const std::vector<param> &test_case);
+      bool ground(dtest_case &test_case);
+  };
+}
+
+#endif  // SIMPLE_CONSTRAINT_HANDLER_H_
+

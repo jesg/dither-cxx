@@ -18,7 +18,7 @@
 #include <unordered_map>
 #include "combinations.h"
 #include "dither_types.h"
-#include "constraint_handler.h"
+#include "base_constraint_handler.h"
 #include "simple_constraint_handler.h"
 
 namespace dither {

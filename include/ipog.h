@@ -19,11 +19,12 @@
 #include "combinations.h"
 #include "dither_types.h"
 #include "constraint_handler.h"
+#include "simple_constraint_handler.h"
 
 namespace dither {
 
 class Ipog {
-  int t_;
+  std::size_t t_;
   std::vector<std::vector<dval>> input_params_;
   std::vector<std::vector<param>> param_cache_;
   std::forward_list<dtest_case> bound_;
@@ -35,16 +36,16 @@ class Ipog {
   std::unordered_map<int, std::string> reverse_param_index_;
   dtest_case merge_scratch_;
   BaseConstraintHandler* constraint_handler;
-  std::vector<std::vector<int>> constraints;
-  std::vector<int> ranges;
+  std::vector<std::vector<dval>> constraints;
+  std::vector<dval> ranges;
 
  public:
   Ipog();
   ~Ipog();
-  Ipog(const unsigned char);
-  void set_t(const int t) { t_ = t; }
-  void add_parameter(const std::string, const int[], const int);
-  void add_parameter(const std::string, const std::string[], const int);
+  Ipog(const unsigned int);
+  void set_t(const unsigned int t) { t_ = t; }
+  void add_parameter(const std::string, const int[], const unsigned int);
+  void add_parameter(const std::string, const std::string[], const unsigned int);
   void add_parameter(const std::string);
   void init_bound();
   void init_param_cache();
@@ -56,14 +57,14 @@ class Ipog {
   std::forward_list<std::vector<param>> cover(int);
   const int maximize_coverage(const int, dtest_case &,
                               std::forward_list<std::vector<param>> &);
-  void add_constraint(const int[], const int);
+  void add_constraint(const int[], const unsigned int);
   inline bool is_covered(const dtest_case &test_case,
                          const std::vector<param> &params);
   inline bool is_covered(const std::vector<param> &params);
   inline const int merge(const int, dtest_case &, const std::vector<param> &);
   void display_raw_solution();
   inline void display_header() {
-    for (int i = 0; i < param_cache_.size();) {
+    for (std::size_t i = 0; i < param_cache_.size();) {
       std::cout << reverse_param_index_[i];
       if (++i < param_cache_.size()) {
         std::cout << ',';
@@ -73,7 +74,7 @@ class Ipog {
   }
 
   inline void display_test_case(const dtest_case &test_case) {
-    for (int i = 0; i < test_case.size();) {
+    for (std::size_t i = 0; i < test_case.size();) {
       const dval value = test_case[i];
       if (value == -1) {
         std::cout << '-';

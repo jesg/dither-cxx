@@ -92,7 +92,7 @@ inline void gcombinations_(const std::vector<int>& input,
                            std::vector<int>& scratch,
                            std::forward_list<std::vector<int>>& output) {
   std::vector<int> result(scratch.size());
-  for (int i = 0; i < result.size(); i++) {
+  for (std::size_t i = 0; i < result.size(); i++) {
     result[i] = input[scratch[i]];
   }
   output.push_front(result);

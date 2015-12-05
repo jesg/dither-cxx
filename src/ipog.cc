@@ -26,7 +26,7 @@ Ipog::Ipog() {
   t_ = 2;
 }
 
-Ipog::Ipog(const unsigned char t) {
+Ipog::Ipog(const unsigned int t) {
   t_ = t;
 }
 
@@ -35,7 +35,7 @@ void Ipog::init_bound() {
   dtest_case tmp;
 
   product(bound_, tmp, input_params_.begin(), input_params_.begin() + t_);
-  const int size = param_cache_.size();
+  auto size = param_cache_.size();
   for (auto it = bound_.begin(); it != bound_.end(); ++it) {
     (*it).resize(size, -1);
     (*it).shrink_to_fit();
@@ -45,9 +45,10 @@ void Ipog::init_bound() {
 
   if(constraints.size() > 0) {
     for(auto it = param_cache_.cbegin(); it != param_cache_.cend(); ++it) {
-      ranges.push_back((*it).size() - 1);
+      const dval tmp = (*it).size() - 1;
+      ranges.push_back(tmp);
     }
-    constraint_handler = new GecodeConstraintHandler(ranges, constraints);
+    constraint_handler = new SimpleConstraintHandler(ranges, constraints);
   } else {
     constraint_handler = new BaseConstraintHandler();
   }
@@ -55,7 +56,7 @@ void Ipog::init_bound() {
 
 std::forward_list<std::vector<param>> Ipog::cover(const int k) {
   std::vector<int> input(k);
-  for (int i = 0; i < k; i++) {
+  for (std::size_t i = 0; i < k; i++) {
     input[i] = i;
   }
 
@@ -112,7 +113,6 @@ void Ipog::run() {
 				auto next = unbound_.begin();
 				auto end = unbound_.end();
 				while (next != end) {
-          int b = (*next)[0];
 					const int merge_result = merge(k, *next, test_case);
 					if (merge_result == 0) {
 						bound_.push_front(*next);
@@ -148,8 +148,6 @@ inline const int Ipog::merge(const int k, dtest_case &test_case,
     const std::vector<param> &pairs) {
   for (auto it = pairs.cbegin(); it != pairs.cend(); ++it) {
     auto value = test_case[(*it).first];
-    int s = (*it).second;
-    int v = value;
     if (!(value == -1 || value == (*it).second)) {
       return -1;
     }
@@ -242,14 +240,14 @@ void Ipog::display_raw_solution() {
 }
 
 void Ipog::add_parameter(const std::string name, const int *terms,
-    const int terms_length) {
+    const unsigned int terms_length) {
   std::vector<int> tmp(terms, terms + terms_length);
   std::pair<std::string, std::vector<int>> key_value(name, tmp);
   int_params_.insert(key_value);
 }
 
 void Ipog::add_parameter(const std::string name, const std::string *terms,
-    const int terms_length) {
+    const unsigned int terms_length) {
   std::vector<std::string> tmp(terms, terms + terms_length);
   std::pair<std::string, std::vector<std::string>> key_value(name, tmp);
   str_params_.insert(key_value);
@@ -324,19 +322,27 @@ int Ipog::size() {
 
 std::string *Ipog::header() {
   std::string *result = new std::string[param_cache_.size()];
-  for (int i = 0; i < param_cache_.size(); i++) {
+  for (std::size_t i = 0; i < param_cache_.size(); i++) {
     result[i] = reverse_param_index_[i];
   }
   return result;
 }
 
-  void Ipog::add_constraint(const int* constraint, const int length) {
+  void Ipog::add_constraint(const int* constraint, const unsigned int length) {
     if(length != param_cache_.size()) {
       std::cerr << "Warning: dither constraint length does not equal params length" << std::endl;
       return;
     }
-    std::vector<int> tmp(length);
+    std::vector<dval> tmp(length);
     std::copy(constraint, constraint+length, tmp.begin());
+    for(auto it = tmp.cbegin(); it != tmp.cend(); ++it) {
+      if((*it) < 0) {
+        std::cerr << "WARNING: constraint value < 0, behavior undefined" << std::endl;
+      }
+      if((*it) > SCHAR_MAX) {
+        std::cerr << "WARNING: constraint value > " << SCHAR_MAX << " behavior undefined" << std::endl;
+      }
+    }
     constraints.push_back(tmp);
   }
 

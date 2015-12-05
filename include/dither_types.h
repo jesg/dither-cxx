@@ -21,7 +21,7 @@ typedef signed char dval;
 #define DITHER_STRING_T 2
 
 struct param {
-  int first;
+  std::size_t first;
   dval second;
   std::string name;
   unsigned char type;

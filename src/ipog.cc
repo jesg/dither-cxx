@@ -244,6 +244,7 @@ void Ipog::add_parameter(const std::string name, const int *terms,
   std::vector<int> tmp(terms, terms + terms_length);
   std::pair<std::string, std::vector<int>> key_value(name, tmp);
   int_params_.insert(key_value);
+  ordered_param_names_.push_back(name);
 }
 
 void Ipog::add_parameter(const std::string name, const std::string *terms,
@@ -251,6 +252,7 @@ void Ipog::add_parameter(const std::string name, const std::string *terms,
   std::vector<std::string> tmp(terms, terms + terms_length);
   std::pair<std::string, std::vector<std::string>> key_value(name, tmp);
   str_params_.insert(key_value);
+  ordered_param_names_.push_back(name);
 }
 
 void Ipog::add_parameter(const std::string name) {
@@ -258,6 +260,7 @@ void Ipog::add_parameter(const std::string name) {
   std::vector<bool> tmp(arr, arr + 2);
   std::pair<std::string, std::vector<bool>> key_value(name, tmp);
   bool_params_.insert(key_value);
+  ordered_param_names_.push_back(name);
 }
 
 void Ipog::init_param_cache() {
@@ -291,13 +294,23 @@ void Ipog::init_param_cache() {
     return std::get<2>(a) > std::get<2>(b);
   });
 
+  std::unordered_map<std::string, int> original_name_to_index;
   int count = 0;
+  for(auto it = ordered_param_names_.cbegin(); it != ordered_param_names_.cend(); ++it, count++) {
+    original_name_to_index.insert({{*it, count}});
+  }
+  ordered_param_index_.resize(tmp.size());
+  reverse_ordered_param_index_.resize(tmp.size());
+
+  count = 0;
   for (auto it = tmp.cbegin(); it != tmp.cend(); ++it, count++) {
     std::vector<param> params;
     std::vector<dval> dvals;
     auto name = std::get<0>(*it);
     auto type = std::get<1>(*it);
     reverse_param_index_.insert({{count, name}});
+    ordered_param_index_[count] = original_name_to_index.find(name)->second;
+    reverse_ordered_param_index_[original_name_to_index.find(name)->second] = count;
 
     for (dval i = 0; i < SCHAR_MAX && i < std::get<2>(*it); i++) {
       param my_param;
@@ -332,9 +345,6 @@ std::string *Ipog::header() {
     std::vector<dval> tmp(length);
     std::copy(constraint, constraint+length, tmp.begin());
     for(auto it = tmp.cbegin(); it != tmp.cend(); ++it) {
-      if((*it) < 0) {
-        std::cerr << "WARNING: constraint value < 0, behavior undefined" << std::endl;
-      }
       if((*it) > SCHAR_MAX) {
         std::cerr << "WARNING: constraint value > " << SCHAR_MAX << " behavior undefined" << std::endl;
       }
@@ -343,6 +353,8 @@ std::string *Ipog::header() {
   }
 
 void Ipog::ground_solutions() {
+  std::vector<dval> transform_scratch(param_cache_.size(), 0);
+
   auto prev = bound_.cbefore_begin();
   auto next = bound_.begin();
   auto end = bound_.cend();
@@ -350,6 +362,7 @@ void Ipog::ground_solutions() {
     if (constraint_handler->violate_constraints(*next)) {
       next = bound_.erase_after(prev);
     } else {
+      transform(transform_scratch, *next);
       ++prev;
       ++next;
     }
@@ -358,6 +371,7 @@ void Ipog::ground_solutions() {
   while(!unbound_.empty()) {
     dtest_case first = unbound_.front();
     if(constraint_handler->ground(first)) {
+      transform(transform_scratch, first);
       bound_.push_front(first);
     }
     unbound_.pop_front();

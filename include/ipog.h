@@ -32,12 +32,22 @@ class Ipog {
   std::unordered_map<std::string, std::vector<int>> int_params_;
   std::unordered_map<std::string, std::vector<std::string>> str_params_;
   std::unordered_map<std::string, std::vector<bool>> bool_params_;
+  std::vector<std::string> ordered_param_names_;
+  std::vector<int> ordered_param_index_;
+  std::vector<int> reverse_ordered_param_index_;
   std::unordered_map<std::string, int> param_index_;
   std::unordered_map<int, std::string> reverse_param_index_;
   dtest_case merge_scratch_;
   BaseConstraintHandler* constraint_handler;
   std::vector<std::vector<dval>> constraints;
   std::vector<dval> ranges;
+
+  inline void transform(std::vector<dval>& scratch, std::vector<dval>& test_case) {
+    for(std::size_t i = 0; i < test_case.size(); i++) {
+      scratch[ordered_param_index_[i]] = test_case[i];
+    }
+    std::copy(scratch.cbegin(), scratch.cend(), test_case.begin());
+  }
 
  public:
   Ipog();
@@ -84,7 +94,7 @@ class Ipog {
         }
         continue;
       }
-      const param my_param = param_cache_[i][value];
+      const param my_param = param_cache_[reverse_ordered_param_index_[i]][value];
       switch (my_param.type) {
         case DITHER_INT_T:
           std::cout << int_params_[my_param.name][my_param.second];

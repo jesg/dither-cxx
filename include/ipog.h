@@ -41,6 +41,7 @@ class Ipog {
   BaseConstraintHandler* constraint_handler;
   std::vector<std::vector<dval>> constraints;
   std::vector<dval> ranges;
+	std::size_t solution_size;
 
   inline void transform(std::vector<dval>& scratch, std::vector<dval>& test_case) {
     for(std::size_t i = 0; i < test_case.size(); i++) {

@@ -328,9 +328,7 @@ void Ipog::init_param_cache() {
 }
 
 int Ipog::size() {
-  auto bound_size = std::distance(bound_.cbegin(), bound_.cend());
-  auto unbound_size = std::distance(unbound_.cbegin(), unbound_.cend());
-  return bound_size + unbound_size;
+  return solution_size;
 }
 
 std::string *Ipog::header() {
@@ -353,6 +351,7 @@ std::string *Ipog::header() {
   }
 
 void Ipog::ground_solutions() {
+	std::size_t solution_count = 0;
   std::vector<dval> transform_scratch(param_cache_.size(), 0);
 
   auto prev = bound_.cbefore_begin();
@@ -363,6 +362,7 @@ void Ipog::ground_solutions() {
       next = bound_.erase_after(prev);
     } else {
       transform(transform_scratch, *next);
+			solution_count++;
       ++prev;
       ++next;
     }
@@ -372,10 +372,12 @@ void Ipog::ground_solutions() {
     dtest_case first = unbound_.front();
     if(constraint_handler->ground(first)) {
       transform(transform_scratch, first);
+			solution_count++;
       bound_.push_front(first);
     }
     unbound_.pop_front();
   }
+	solution_size = solution_count;
   }
 
 void Ipog::fill(int *solution) {

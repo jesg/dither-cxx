@@ -42,6 +42,8 @@ class Ipog {
   std::vector<std::vector<dval>> constraints;
   std::vector<dval> ranges;
 	std::size_t solution_size;
+	std::vector<std::vector<dval>> original_previously_tested_;
+	std::vector<std::vector<dval>> previously_tested_;
 
   inline void transform(std::vector<dval>& scratch, std::vector<dval>& test_case) {
     for(std::size_t i = 0; i < test_case.size(); i++) {
@@ -49,6 +51,10 @@ class Ipog {
     }
     std::copy(scratch.cbegin(), scratch.cend(), test_case.begin());
   }
+
+  inline bool has_previously_tested(std::vector<param>& test_case);
+  inline bool has_previously_tested(dtest_case& test_case);
+  inline bool has_previously_tested(const int, dtest_case& test_case);
 
  public:
   Ipog();
@@ -69,6 +75,7 @@ class Ipog {
   const int maximize_coverage(const int, dtest_case &,
                               std::forward_list<std::vector<param>> &);
   void add_constraint(const int[], const unsigned int);
+	void add_previously_tested(const int[], const std::size_t);
   inline bool is_covered(const dtest_case &test_case,
                          const std::vector<param> &params);
   inline bool is_covered(const std::vector<param> &params);

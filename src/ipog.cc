@@ -40,6 +40,7 @@ void Ipog::init_bound() {
     (*it).resize(size, -1);
     (*it).shrink_to_fit();
   }
+  bound_.remove_if([this](dtest_case& a) { return has_previously_tested(a); });
 
   merge_scratch_.resize(param_cache_.size(), -1);
 
@@ -80,6 +81,7 @@ std::forward_list<std::vector<param>> Ipog::cover(const int k) {
     std::vector<std::vector<param>> x = *it;
     product2(coverage, tmp, (*it).cbegin(), (*it).cend());
   }
+  coverage.remove_if([this](std::vector<param>& a) { return has_previously_tested(a); });
   return coverage;
 }
 
@@ -325,6 +327,14 @@ void Ipog::init_param_cache() {
     param_cache_.push_back(params);
     input_params_.push_back(dvals);
   }
+
+	std::vector<dval> prev_tested_scratch(param_cache_.size());
+	for(auto it = original_previously_tested_.cbegin(); it != original_previously_tested_.cend(); ++it) {
+		for(std::size_t i = 0; i < prev_tested_scratch.size(); i++) {
+			prev_tested_scratch[reverse_ordered_param_index_[i]] = (*it)[i];
+		}
+		previously_tested_.push_back(prev_tested_scratch);
+	}
 }
 
 int Ipog::size() {
@@ -358,7 +368,7 @@ void Ipog::ground_solutions() {
   auto next = bound_.begin();
   auto end = bound_.cend();
   while (next != end) {
-    if (constraint_handler->violate_constraints(*next)) {
+    if (constraint_handler->violate_constraints(*next) || has_previously_tested(*next)) {
       next = bound_.erase_after(prev);
     } else {
       transform(transform_scratch, *next);
@@ -371,9 +381,11 @@ void Ipog::ground_solutions() {
   while(!unbound_.empty()) {
     dtest_case first = unbound_.front();
     if(constraint_handler->ground(first)) {
-      transform(transform_scratch, first);
-			solution_count++;
-      bound_.push_front(first);
+      if(!has_previously_tested(first)) {
+        transform(transform_scratch, first);
+        solution_count++;
+        bound_.push_front(first);
+      }
     }
     unbound_.pop_front();
   }
@@ -388,4 +400,44 @@ void Ipog::fill(int *solution) {
     }
   }
 }
+
+void Ipog::add_previously_tested(const int values[], const std::size_t length) {
+	std::vector<dval> tmp(length);
+	std::copy(values, values+length, tmp.begin());
+	original_previously_tested_.push_back(tmp);
+}
+
+  inline bool Ipog::has_previously_tested(std::vector<param>& test_case) {
+    for(auto it = previously_tested_.cbegin(); it != previously_tested_.cend(); ++it) {
+      bool flag = true;
+      for(auto iit = test_case.cbegin(); iit != test_case.cend(); ++iit) {
+        if((*it)[(*iit).first] != (*iit).second) {
+          flag = false;
+          break;
+        }
+      }
+      if(flag) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  inline bool Ipog::has_previously_tested(dtest_case& test_case) {
+    for(auto it = previously_tested_.cbegin(); it != previously_tested_.cend(); ++it) {
+      if(std::equal(test_case.cbegin(), test_case.cend(), (*it).cbegin())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  inline bool Ipog::has_previously_tested(const int k, dtest_case& test_case) {
+    for(auto it = previously_tested_.cbegin(); it != previously_tested_.cend(); ++it) {
+      if(std::equal(test_case.cbegin(), test_case.cbegin()+k, (*it).cbegin())) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

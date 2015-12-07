@@ -38,6 +38,10 @@ void dither_ipog_get_solution(ipog_handle self, int *solution) {
   static_cast<dither::Ipog *>(self)->fill(solution);
 }
 
-void dither_add_constraint(ipog_handle self, const int constraint[], const int length) {
+void dither_ipog_add_constraint(ipog_handle self, const int constraint[], const int length) {
   static_cast<dither::Ipog *>(self)->add_constraint(constraint, length);
+}
+
+void dither_ipog_add_previously_tested(ipog_handle self, const int tested[], const int length) {
+  static_cast<dither::Ipog *>(self)->add_previously_tested(tested, length);
 }

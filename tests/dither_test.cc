@@ -51,13 +51,15 @@ TEST(IpogTest, 2WayWithConstraintsExcludeSubCombination) {
   dither_ipog_add_parameter_int(ipog, 0, nums, 4);
   dither_ipog_add_parameter_int(ipog, 1, nums, 3);
   dither_ipog_add_parameter_int(ipog, 2, nums, 2);
+	int tested[] = {2, 2, 1};
 
   int constraint[] = {0, 1, -1};
   int constraint2[] = {0, 0, -1};
   int constraint3[] = {0, 2, -1};
-  dither_add_constraint(ipog, constraint, 3);
-  dither_add_constraint(ipog, constraint2, 3);
-  dither_add_constraint(ipog, constraint3, 3);
+  dither_ipog_add_constraint(ipog, constraint, 3);
+  dither_ipog_add_constraint(ipog, constraint2, 3);
+  dither_ipog_add_constraint(ipog, constraint3, 3);
+  dither_ipog_add_previously_tested(ipog, tested, 3);
   dither_ipog_run(ipog);
   dither_ipog_display_raw_solution(ipog);
   std::cout << dither_ipog_size(ipog) << std::endl;
@@ -81,6 +83,7 @@ TEST(IpogTest, 3WayTCAS) {
   }
 
   dither_ipog_run(ipog);
+	std::cout << dither_ipog_size(ipog) << std::endl;
   ASSERT_EQ (dither_ipog_size(ipog), 405);
   dither_ipog_delete(ipog);
 }

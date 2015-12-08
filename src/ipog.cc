@@ -328,13 +328,21 @@ void Ipog::init_param_cache() {
     input_params_.push_back(dvals);
   }
 
-	std::vector<dval> prev_tested_scratch(param_cache_.size());
+	std::vector<dval> scratch(param_cache_.size());
 	for(auto it = original_previously_tested_.cbegin(); it != original_previously_tested_.cend(); ++it) {
-		for(std::size_t i = 0; i < prev_tested_scratch.size(); i++) {
-			prev_tested_scratch[reverse_ordered_param_index_[i]] = (*it)[i];
+		for(std::size_t i = 0; i < scratch.size(); i++) {
+			scratch[reverse_ordered_param_index_[i]] = (*it)[i];
 		}
-		previously_tested_.push_back(prev_tested_scratch);
+		previously_tested_.push_back(scratch);
 	}
+
+  // transform constraints
+  for(std::size_t j = 0; j < constraints.size(); j++) {
+    for(std::size_t i = 0; i < scratch.size(); i++) {
+      scratch[reverse_ordered_param_index_[i]] = constraints[j][i];
+    }
+    std::copy(scratch.begin(), scratch.end(), constraints[j].begin());
+  }
 }
 
 int Ipog::size() {

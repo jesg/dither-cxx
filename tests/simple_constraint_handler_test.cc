@@ -213,31 +213,40 @@ TEST(GecodeCompatibilityConstraintTest, canValidateGecodeConstraintOnParams) {
 TEST(GecodeCompatibilityConstraintTest, canGroundSimpleConstraintOnTestCase) {
   std::vector<dither::dval> arr;
   arr.push_back(2);
-  arr.push_back(3);
+  arr.push_back(2);
   arr.push_back(4);
   arr.push_back(5);
+  arr.push_back(1);
   std::vector<std::vector<dither::dval>> constraints;
   std::vector<dither::dval> tmp;
   std::vector<dither::dval> tmp2;
   std::vector<dither::dval> tmp3;
   std::vector<dither::dval> tmp4;
-  int constraint[] = {-1, 0, 0, -1};
-  int constraint2[] = {-1, 0, -1, -1};
-  int constraint3[] = {-1, -1, 0, 0};
-  int constraint4[] = {-1, -1, 0, 1};
-  for(unsigned int i = 0; i < 4; i++) {
+  std::vector<dither::dval> tmp5;
+  std::vector<dither::dval> tmp6;
+  int constraint[] = {-1, 0, 0, -1, -1};
+  int constraint2[] = {-1, 0, -1, -1, -1};
+  int constraint3[] = {-1, -1, 0, 0, -1};
+  int constraint4[] = {-1, -1, 0, 1, -1};
+  int constraint5[] = {-1, -1, 0, -1, 0};
+  int constraint6[] = {-1, -1, 0, -1, 1};
+  for(unsigned int i = 0; i < 5; i++) {
     tmp.push_back(constraint[i]);
     tmp2.push_back(constraint2[i]);
     tmp3.push_back(constraint3[i]);
     tmp4.push_back(constraint4[i]);
+    tmp5.push_back(constraint5[i]);
+    tmp6.push_back(constraint6[i]);
   }
   constraints.push_back(tmp);
   constraints.push_back(tmp2);
   constraints.push_back(tmp3);
   constraints.push_back(tmp4);
+  constraints.push_back(tmp5);
+  constraints.push_back(tmp6);
 
   dither::SimpleConstraintHandler handler(arr, constraints);
-  dither::dtest_case dcase(4, -1);
+  dither::dtest_case dcase(5, -1);
   dcase[0] = 0;
   ASSERT_TRUE(handler.ground(dcase));
   ASSERT_EQ(dcase[1], 1);
@@ -257,4 +266,17 @@ TEST(GecodeCompatibilityConstraintTest, canGroundSimpleConstraintOnTestCase) {
   dcase[2] = 0;
   dcase[3] = 0;
   ASSERT_FALSE(handler.ground(dcase));
+
+  std::fill(dcase.begin(), dcase.end(), -1);
+  dcase[1] = 0;
+  dcase[4] = 0;
+  ASSERT_FALSE(handler.ground(dcase));
+
+  std::fill(dcase.begin(), dcase.end(), -1);
+  dcase[3] = 2;
+  ASSERT_TRUE(handler.ground(dcase));
+
+  std::fill(dcase.begin(), dcase.end(), -1);
+  dcase[4] = 0;
+  ASSERT_TRUE(handler.ground(dcase));
 }

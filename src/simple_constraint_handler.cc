@@ -8,13 +8,14 @@
  */
 
 #include "simple_constraint_handler.h"
+#include <iostream>
 
 namespace dither {
 
   SimpleConstraintHandler::SimpleConstraintHandler(std::vector<dval>& ranges, std::vector<std::vector<dval>>& pconstraints) : params(ranges) {
     for(auto it = pconstraints.cbegin(); it != pconstraints.cend(); ++it) {
       std::vector<std::pair<std::size_t, dval>> constraint;
-      int i = 0;
+      std::size_t i = 0;
       for(auto iit = (*it).cbegin(); iit != (*it).cend(); ++iit, i++) {
         if((*iit) != -1) {
           constraint.push_back(std::make_pair(i, *iit));
@@ -86,32 +87,30 @@ namespace dither {
     if(indexes.size() == 0) {
       return true;
     }
-    std::vector<dval> bound_values(indexes.size(), 0);
+    std::vector<dval> bound_values(indexes.size(), -1);
     i = 0;
 
-LOOP:{
-       do {
-         test_case[indexes[i]] = bound_values[i];
+LOOP:while(i < indexes.size()) {
+
+       const dval max = params[indexes[i]];
+       for(dval value = bound_values[i] + 1; value <= max; value++) {
+         test_case[indexes[i]] = value;
          if(violate_constraints(test_case)) {
-           // try to bump a bound value... return false if no valid value
-           const std::size_t upper_bound = i + 1;
-           for(std::size_t j = 0; j < upper_bound; j++) {
-             auto bump_value = bound_values[i] + 1;
-             if(bump_value < params[indexes[i]]) {
-               bound_values[i] = bump_value;
-               goto LOOP;
-             }
-
-             // unwind
-             bound_values[i] = 0;
-             test_case[indexes[i]] = -1;
-             i--;
-           }
-
-           return false;
+           continue;
          }
+         bound_values[i] = value;
          i++;
-       }while(i < indexes.size());
+         goto LOOP;
+       }
+
+       if(i == 0) {
+         return false;
+       }
+
+       // unwind
+       bound_values[i] = -1;
+       test_case[indexes[i]] = -1;
+       i--;
      }
 
      return true;

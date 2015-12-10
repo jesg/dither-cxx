@@ -34,7 +34,7 @@ void dither_ipog_display_raw_solution(ipog_handle self) {
   static_cast<dither::Ipog *>(self)->display_raw_solution();
 }
 
-void dither_ipog_get_solution(ipog_handle self, int *solution) {
+void dither_ipog_fill(ipog_handle self, int *solution) {
   static_cast<dither::Ipog *>(self)->fill(solution);
 }
 

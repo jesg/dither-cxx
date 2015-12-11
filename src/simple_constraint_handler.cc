@@ -27,6 +27,9 @@ namespace dither {
   }
 
   bool SimpleConstraintHandler::violate_constraints(const dtest_case &test_case) {
+    if(violate_constraints_(test_case)) {
+      return true;
+    }
     std::copy(test_case.cbegin(), test_case.cend(), scratch.begin());
     return !ground(scratch);
   }
@@ -54,6 +57,9 @@ namespace dither {
     std::fill(scratch.begin(), scratch.end(), -1);
     for(auto p : test_case) {
       scratch[p.first] = p.second;
+    }
+    if(violate_constraints_(scratch)) {
+      return true;
     }
     return !ground(scratch);
   }

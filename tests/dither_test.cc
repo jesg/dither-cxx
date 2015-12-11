@@ -63,8 +63,32 @@ TEST(IpogTest, 2WayWithConstraintsExcludeSubCombination) {
   dither_ipog_run(ipog);
   dither_ipog_display_raw_solution(ipog);
   std::cout << dither_ipog_size(ipog) << std::endl;
-  ASSERT_EQ (dither_ipog_size(ipog), 12);
+  ASSERT_EQ (dither_ipog_size(ipog), 9);
   dither_ipog_delete(ipog);
+}
+
+TEST(IpogTest, 2WayWithConstraintsExcludeSubCombinationFromRubyGem) {
+  int nums[] = {0, 1, 2, 3};
+  ipog_handle ipog = dither_ipog_new(3);
+  dither_ipog_add_parameter_int(ipog, 0, nums, 2);
+  dither_ipog_add_parameter_int(ipog, 1, nums, 2);
+  dither_ipog_add_parameter_int(ipog, 2, nums, 2);
+  dither_ipog_add_parameter_int(ipog, 3, nums, 4);
+
+  int constraint[] = {0, 1, 0, -1};
+  dither_ipog_add_constraint(ipog, constraint, 4);
+  dither_ipog_run(ipog);
+  dither_ipog_display_raw_solution(ipog);
+  std::size_t s = dither_ipog_size(ipog) * 4;
+  int *solution = new int[s];
+  dither_ipog_fill(ipog, solution);
+  std::size_t i = 0;
+  while(i < s) {
+    ASSERT_FALSE(solution[i] == 0 && solution[i+1] == 1 && solution[i+2] == 0);
+    i += 4;
+  }
+  dither_ipog_delete(ipog);
+  delete [] solution;
 }
 
 TEST(IpogTest, 3WayTCAS) {

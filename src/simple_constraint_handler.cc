@@ -58,37 +58,6 @@ namespace dither {
     return !ground(scratch);
   }
 
-  inline bool SimpleConstraintHandler::violate_constraints_(const std::vector<param> &test_case) {
-    for(auto constraint = constraints.cbegin(); constraint != constraints.cend(); ++constraint) {
-      if(violate_constraint(test_case, *constraint)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  inline bool SimpleConstraintHandler::violate_constraint(const std::vector<param>& test_case, const std::vector<std::pair<std::size_t, dval>>& constraint) {
-    if(test_case.size() < constraint.size()) {
-      return false;
-    }
-
-    std::size_t count = 0;
-    for(auto it = constraint.cbegin(); it != constraint.cend(); ++it) {
-      bool flag = true;
-      for(auto iit = test_case.cbegin(); iit != test_case.cend(); ++iit) {
-        if((*iit).first == (*it).first && (*iit).second == (*it).second) {
-          flag = false;
-          break;
-        }
-      }
-      if(flag) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   bool SimpleConstraintHandler::ground(dtest_case &test_case) {
     std::vector<std::size_t> indexes;
 

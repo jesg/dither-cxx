@@ -25,9 +25,7 @@ namespace dither {
       std::vector<dval> scratch;
 
       inline bool violate_constraint(const dtest_case& test_case, const std::vector<std::pair<std::size_t, dval>>& constraint);
-      inline bool violate_constraint(const std::vector<param>& test_case, const std::vector<std::pair<std::size_t, dval>>& constraint);
       inline bool violate_constraints_(const dtest_case &test_case);
-      inline bool violate_constraints_(const std::vector<param> &test_case);
 
     public:
       SimpleConstraintHandler(std::vector<dval>& ranges, std::vector<std::vector<dval>>& pconstraints);

@@ -63,7 +63,7 @@ TEST(IpogTest, 2WayWithConstraintsExcludeSubCombination) {
   dither_ipog_run(ipog);
   dither_ipog_display_raw_solution(ipog);
   std::cout << dither_ipog_size(ipog) << std::endl;
-  ASSERT_EQ (dither_ipog_size(ipog), 9);
+  ASSERT_EQ (dither_ipog_size(ipog), 12);
   dither_ipog_delete(ipog);
 }
 

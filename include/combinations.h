@@ -122,6 +122,40 @@ inline void product(
     rvi.pop_back();                   // clean ME off for next round
   }
 }
+
+inline void product3(
+    std::forward_list<dtest_case>& results,
+std::vector<dtest_case>::const_iterator begin,
+std::vector<dtest_case>::const_iterator end) {
+  dtest_case ranges;
+  for(auto it = begin; it != end; ++it) {
+    const dval tmp = (*it).size() - 1;
+    ranges.push_back(tmp);
+  }
+
+  dtest_case scratch(ranges.size(), 0);
+
+  const std::size_t max = ranges.size() - 1;
+  for(std::size_t i = max;;) {
+
+    if(i == max) {
+      for(dval val = 0; val <= ranges[i]; val++) {
+        results.push_front(scratch);
+        scratch[i]++;
+      }
+      scratch[i] = 0;
+      i--;
+    } else if(i == 0 && scratch[i] >= ranges[i]) {
+      return;
+    } else if(scratch[i] < ranges[i]) {
+      scratch[i]++;
+      i++;
+    } else {
+      scratch[i] = -1;
+      i--;
+    }
+  }
+}
 }
 
 #endif

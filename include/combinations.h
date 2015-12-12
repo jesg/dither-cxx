@@ -125,8 +125,8 @@ inline void product(
 
 inline void product3(
     std::forward_list<dtest_case>& results,
-std::vector<dtest_case>::const_iterator begin,
-std::vector<dtest_case>::const_iterator end) {
+    std::vector<dtest_case>::const_iterator begin,
+    std::vector<dtest_case>::const_iterator end) {
   dtest_case ranges;
   for(auto it = begin; it != end; ++it) {
     const dval tmp = (*it).size() - 1;

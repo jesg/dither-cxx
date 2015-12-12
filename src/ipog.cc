@@ -77,10 +77,7 @@ std::forward_list<std::vector<param>> Ipog::cover(const int k) {
 
   std::forward_list<std::vector<param>> coverage;
   for (auto it = product_input.begin(); it != product_input.end(); ++it) {
-    std::vector<param> tmp;
-    std::vector<std::vector<param>> x = *it;
-    // TODO refactor
-    product2(coverage, tmp, (*it).cbegin(), (*it).cend());
+    product4(coverage, *it);
   }
   coverage.remove_if([this](std::vector<param>& a) { return has_previously_tested(a); });
   return coverage;

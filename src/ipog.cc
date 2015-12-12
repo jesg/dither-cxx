@@ -31,10 +31,10 @@ Ipog::Ipog(const unsigned int t) {
 }
 
 void Ipog::init_bound() {
-  using dither::product;
+  using dither::product3;
   dtest_case tmp;
 
-  product(bound_, tmp, input_params_.begin(), input_params_.begin() + t_);
+  product3(bound_, input_params_.begin(), input_params_.begin() + t_);
   auto size = param_cache_.size();
   for (auto it = bound_.begin(); it != bound_.end(); ++it) {
     (*it).resize(size, -1);
@@ -79,6 +79,7 @@ std::forward_list<std::vector<param>> Ipog::cover(const int k) {
   for (auto it = product_input.begin(); it != product_input.end(); ++it) {
     std::vector<param> tmp;
     std::vector<std::vector<param>> x = *it;
+    // TODO refactor
     product2(coverage, tmp, (*it).cbegin(), (*it).cend());
   }
   coverage.remove_if([this](std::vector<param>& a) { return has_previously_tested(a); });

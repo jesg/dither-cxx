@@ -13,6 +13,7 @@
 #include <utility>
 #include <tuple>
 #include <limits.h>
+#include <cstddef>
 
 namespace dither {
 
@@ -107,37 +108,48 @@ void Ipog::run() {
       const std::vector<param> &test_case = *pairs;
       bool case_covered = constraint_handler->violate_constraints(test_case);
 
-			if (!case_covered) {
-				bool is_merged = false;
-				auto prev = unbound_.before_begin();
-				auto next = unbound_.begin();
-				auto end = unbound_.end();
-				while (next != end) {
-					const int merge_result = merge(k, *next, test_case);
-					if (merge_result == 0) {
-						bound_.push_front(*next);
-						unbound_.erase_after(prev);
-						is_merged = true;
-						break;
-					} else if (merge_result == 1) {
-						is_merged = true;
-						break;
-					}
-					++prev;
-					++next;
-				}
+      if(!case_covered) {
+        for (auto it = unbound_.cbegin(); it != unbound_.cend(); ++it) {
+          if(is_covered(*it, test_case)) {
+            case_covered = true;
+            break;
+          }
+        }
+      }
 
-				if (!is_merged) {
-					dtest_case unbound_test_case(param_cache_.size(), -1);
-					for (auto it = test_case.cbegin(); it != test_case.cend(); ++it) {
-						unbound_test_case[(*it).first] = (*it).second;
-					}
-					if (!constraint_handler->violate_constraints(unbound_test_case)) {
-						unbound_.push_front(unbound_test_case);
-					}
-				}
-			}
+      if (!case_covered) {
+        auto prev = unbound_.before_begin();
+        auto next = unbound_.begin();
+        auto end = unbound_.end();
+        bool is_merged = false;
 
+        if(!is_merged) {
+          while (next != end) {
+            const int merge_result = merge(k, *next, test_case);
+
+            if (merge_result > 0) {
+              dtest_case tmp = *next;
+              for (auto it = test_case.cbegin(); it != test_case.cend(); ++it) {
+                tmp[(*it).first] = (*it).second;
+              }
+              is_merged = true;
+              break;
+            }
+            ++prev;
+            ++next;
+          }
+        }
+
+        if (!is_merged) {
+          dtest_case unbound_test_case(param_cache_.size(), -1);
+          for (auto it = test_case.cbegin(); it != test_case.cend(); ++it) {
+            unbound_test_case[(*it).first] = (*it).second;
+          }
+          if (!constraint_handler->violate_constraints(unbound_test_case)) {
+            unbound_.push_front(unbound_test_case);
+          }
+        }
+      }
     }
   }
   ground_solutions();
@@ -163,12 +175,8 @@ inline const int Ipog::merge(const int k, dtest_case &test_case,
     return -1;
   }
 
-  for (auto it = pairs.cbegin(); it != pairs.cend(); ++it) {
-    test_case[(*it).first] = (*it).second;
-  }
-
-  for (auto i = 0; i < k; i++) {
-    if (test_case[i] == -1) {
+  for (auto i = 0; i <= k; i++) {
+    if (merge_scratch_[i] == -1) {
       return 1;
     }
   }

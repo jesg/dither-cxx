@@ -7,6 +7,7 @@ Dither-cxx is an experimental C++11 library that implements IPOG.
 * evaluate gecode or YAP (Yet Another Prolog) for constraint handling
 * try to optimize the merge in the vertical extension (done)
 * write a DSL in flex/bison, prolog, minizinc, or lua for command line interface
+* add benchmarks
 
 
 # Copyright

@@ -118,25 +118,18 @@ void Ipog::run() {
       }
 
       if (!case_covered) {
-        auto prev = unbound_.before_begin();
-        auto next = unbound_.begin();
-        auto end = unbound_.end();
         bool is_merged = false;
 
-        if(!is_merged) {
-          while (next != end) {
-            const int merge_result = merge(k, *next, test_case);
+        for(auto next = unbound_.begin(); next != unbound_.end(); ++next) {
+          const int merge_result = merge(k, *next, test_case);
 
-            if (merge_result > 0) {
-              dtest_case tmp = *next;
-              for (auto it = test_case.cbegin(); it != test_case.cend(); ++it) {
-                tmp[(*it).first] = (*it).second;
-              }
-              is_merged = true;
-              break;
+          if (merge_result > 0) {
+            dtest_case tmp = *next;
+            for (auto it = test_case.cbegin(); it != test_case.cend(); ++it) {
+              tmp[(*it).first] = (*it).second;
             }
-            ++prev;
-            ++next;
+            is_merged = true;
+            break;
           }
         }
 

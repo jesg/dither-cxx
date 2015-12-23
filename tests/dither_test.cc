@@ -92,18 +92,18 @@ TEST(IpogTest, 2WayWithConstraintsExcludeSubCombinationFromRubyGem) {
 }
 
 TEST(IpogTest, 3WayTCAS) {
-  int nums[] = {1, 2, 3, 4};
+  int nums[] = {1, 2, 3, 4, 5, 6};
   ipog_handle ipog = dither_ipog_new(3);
   dither_ipog_add_parameter_int(ipog, 0, nums, 4);
   for(unsigned int i = 0; i < 7; i++) {
     dither_ipog_add_parameter_int(ipog, i+1, nums, 2);
   }
-  for(unsigned int i = 0; i < 3; i++) {
-    dither_ipog_add_parameter_int(ipog, 7+i, nums, 3);
-  }
-  int ten[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   for(unsigned int i = 0; i < 2; i++) {
-    dither_ipog_add_parameter_int(ipog, 10+i, ten, 10);
+    dither_ipog_add_parameter_int(ipog, 8+i, nums, 3);
+  }
+  int ten[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  for(unsigned int i = 0; i < 2; i++) {
+    dither_ipog_add_parameter_int(ipog, 11+i, ten, 10);
   }
 
   dither_ipog_run(ipog);

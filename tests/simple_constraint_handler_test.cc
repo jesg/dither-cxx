@@ -76,22 +76,22 @@ TEST(SimpleConstraintHandlerTest, canParamsViolateConstraint) {
   }
   constraints.push_back(tmp);
   constraints.push_back(tmp2);
-  std::vector<dither::param> test_case;
+  std::vector<dither::param*> test_case;
   dither::param param1;
   param1.first = 0;
   param1.second = 0;
-  test_case.push_back(param1);
+  test_case.push_back(&param1);
   dither::SimpleConstraintHandler handler(arr, constraints);
   ASSERT_FALSE(handler.violate_constraints(test_case));
   dither::param param2;
   param2.first = 1;
   param2.second = 0;
-  test_case.push_back(param2);
+  test_case.push_back(&param2);
   ASSERT_FALSE(handler.violate_constraints(test_case));
   dither::param param3;
   param3.first = 2;
   param3.second = 0;
-  test_case.push_back(param3);
+  test_case.push_back(&param3);
   ASSERT_TRUE(handler.violate_constraints(test_case));
 }
 
@@ -185,11 +185,11 @@ TEST(GecodeCompatibilityConstraintTest, canValidateGecodeConstraintOnParams) {
   constraints.push_back(tmp);
 
   dither::SimpleConstraintHandler handler(arr, constraints);
-  std::vector<dither::param> params;
+  std::vector<dither::param*> params;
   dither::param my_param;
   my_param.first = 0;
   my_param.second = 1;
-  params.push_back(my_param);
+  params.push_back(&my_param);
   dither::dtest_case dcase(4, -1);
   dcase[0] = 0;
   ASSERT_FALSE(handler.violate_constraints(params));
@@ -203,10 +203,11 @@ TEST(GecodeCompatibilityConstraintTest, canValidateGecodeConstraintOnParams) {
   params.clear();
   my_param.first = 1;
   my_param.second = 0;
-  params.push_back(my_param);
-  my_param.first = 2;
-  my_param.second = 0;
-  params.push_back(my_param);
+  params.push_back(&my_param);
+  dither::param my_param2;
+  my_param2.first = 2;
+  my_param2.second = 0;
+  params.push_back(&my_param2);
   ASSERT_TRUE(handler.violate_constraints(params));
 }
 

@@ -20,7 +20,7 @@ namespace dither {
       BaseConstraintHandler(){};
       virtual ~BaseConstraintHandler(){};
       virtual bool violate_constraints(const dtest_case &test_case) { return false; }
-      virtual bool violate_constraints(const std::vector<param> &test_case) {
+      virtual bool violate_constraints(const std::vector<param*> &test_case) {
         return false;
       }
       virtual bool ground(dtest_case &test_case) {

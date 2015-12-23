@@ -52,7 +52,7 @@ class Ipog {
     std::copy(scratch.cbegin(), scratch.cend(), test_case.begin());
   }
 
-  inline bool has_previously_tested(std::vector<param>& test_case);
+  inline bool has_previously_tested(std::vector<param*>& test_case);
   inline bool has_previously_tested(dtest_case& test_case);
   inline bool has_previously_tested(const int, dtest_case& test_case);
 
@@ -71,15 +71,15 @@ class Ipog {
   std::string *header();
   void ground_solutions();
   inline bool is_valid() { return t_ <= param_cache_.size(); }
-  std::forward_list<std::vector<param>> cover(int);
+  std::forward_list<std::vector<param*>> cover(int);
   const int maximize_coverage(const int, dtest_case &,
-                              std::forward_list<std::vector<param>> &);
+                              std::forward_list<std::vector<param*>> &);
   void add_constraint(const int[], const unsigned int);
 	void add_previously_tested(const int[], const std::size_t);
   inline bool is_covered(const dtest_case &test_case,
-                         const std::vector<param> &params);
+                         const std::vector<param*> &params);
   inline bool is_covered(const std::vector<param> &params);
-  inline const int merge(const int, dtest_case &, const std::vector<param> &);
+  inline const int merge(const int, dtest_case &, const std::vector<param*> &);
   void display_raw_solution();
   void fill(int[]);
   inline void display_header() {

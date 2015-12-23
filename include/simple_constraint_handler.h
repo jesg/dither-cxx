@@ -30,7 +30,7 @@ namespace dither {
     public:
       SimpleConstraintHandler(std::vector<dval>& ranges, std::vector<std::vector<dval>>& pconstraints);
       bool violate_constraints(const dtest_case &test_case);
-      bool violate_constraints(const std::vector<param> &test_case);
+      bool violate_constraints(const std::vector<param*> &test_case);
       bool ground(dtest_case &test_case);
   };
 }

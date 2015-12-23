@@ -69,10 +69,10 @@ class Ipog {
   void run();
   int size();
   std::string *header();
-  void ground_solutions();
+  inline void ground_solutions();
   inline bool is_valid() { return t_ <= param_cache_.size(); }
-  std::forward_list<std::vector<param*>> cover(int);
-  const int maximize_coverage(const int, dtest_case &,
+  inline std::forward_list<std::vector<param*>> cover(int);
+  inline const int maximize_coverage(const int, dtest_case &,
                               std::forward_list<std::vector<param*>> &);
   void add_constraint(const int[], const unsigned int);
 	void add_previously_tested(const int[], const std::size_t);

@@ -56,7 +56,7 @@ void Ipog::init_bound() {
   }
 }
 
-std::forward_list<std::vector<param*>> Ipog::cover(const int k) {
+inline std::forward_list<std::vector<param*>> Ipog::cover(const int k) {
   std::vector<int> input(k);
   for (std::size_t i = 0; i < k; i++) {
     input[i] = i;
@@ -185,7 +185,7 @@ inline bool Ipog::is_covered(const dtest_case &test_case,
   return true;
 }
 
-const int Ipog::maximize_coverage(const int k, dtest_case &test_case,
+inline const int Ipog::maximize_coverage(const int k, dtest_case &test_case,
     std::forward_list<std::vector<param*>> &pi) {
   const std::vector<param> &param_range = param_cache_[k];
   int current_max = -1;
@@ -201,12 +201,11 @@ const int Ipog::maximize_coverage(const int k, dtest_case &test_case,
     if (!constraint_handler->violate_constraints(test_case)) {
       int count = 0;
       auto prev = pi.before_begin();
-      for (auto params = pi.cbegin(); params != pi.cend(); ++params) {
+      for (auto params = pi.cbegin(); params != pi.cend(); ++params, ++prev) {
         if (is_covered(test_case, *params)) {
           tmp_covered.push_front(prev);
           count++;
         }
-        ++prev;
       }
 
       if (count > current_max) {
@@ -365,7 +364,7 @@ std::string *Ipog::header() {
     constraints.push_back(tmp);
   }
 
-void Ipog::ground_solutions() {
+inline void Ipog::ground_solutions() {
 	std::size_t solution_count = 0;
   std::vector<dval> transform_scratch(param_cache_.size(), 0);
 

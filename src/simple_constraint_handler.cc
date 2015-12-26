@@ -53,6 +53,18 @@ namespace dither {
     return true;
   }
 
+  bool SimpleConstraintHandler::violate_constraints(param** test_case, const std::size_t length) {
+    std::fill(scratch.begin(), scratch.end(), -1);
+    for(std::size_t i = 0; i < length; i++) {
+      const param *p = test_case[i];
+      scratch[p->first] = p->second;
+    }
+    if(violate_constraints_(scratch)) {
+      return true;
+    }
+    return !ground(scratch);
+  }
+
   bool SimpleConstraintHandler::violate_constraints(const std::vector<param*> &test_case) {
     std::fill(scratch.begin(), scratch.end(), -1);
     for(auto p : test_case) {

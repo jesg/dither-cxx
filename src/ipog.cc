@@ -14,6 +14,7 @@
 #include <tuple>
 #include <limits.h>
 #include <cstddef>
+#include <memory>
 
 namespace dither {
 
@@ -27,9 +28,7 @@ Ipog::Ipog() {
   t_ = 2;
 }
 
-Ipog::Ipog(const unsigned int t) {
-  t_ = t;
-}
+Ipog::Ipog(const unsigned int t) : t_(t) {}
 
 void Ipog::init_bound() {
   using dither::product3;
@@ -56,7 +55,7 @@ void Ipog::init_bound() {
   }
 }
 
-std::forward_list<std::vector<param*>> Ipog::cover(const int k) {
+inline param** Ipog::cover(const int k, std::forward_list<param**> &coverage) {
   std::vector<int> input(k);
   for (std::size_t i = 0; i < k; i++) {
     input[i] = i;
@@ -65,27 +64,34 @@ std::forward_list<std::vector<param*>> Ipog::cover(const int k) {
   std::forward_list<std::vector<int>> output;
   combinations(t_ - 1, input, output);
   std::forward_list<std::vector<std::vector<param>*>> product_input;
+  int count = 0;
   for (auto it = output.begin(); it != output.end(); ++it) {
     std::vector<std::vector<param>*> param_tuple;
     (*it).push_back(k);
+    int inner_count = 1;
     for (auto iit = (*it).begin(); iit != (*it).end(); ++iit) {
       param_tuple.push_back(&param_cache_[*iit]);
+      inner_count *= param_cache_[*iit].size();
     }
+    count += inner_count;
     product_input.push_front(param_tuple);
   }
 
-  std::forward_list<std::vector<param*>> coverage;
+  param **local_param_cache = new param*[count*t_];
+  std::size_t j = 0;
   for (auto it = product_input.begin(); it != product_input.end(); ++it) {
-    product4(coverage, *it);
+    j += t_*product4(coverage, local_param_cache+j, *it);
   }
-  coverage.remove_if([this](std::vector<param*>& a) { return has_previously_tested(a); });
-  return coverage;
+  coverage.remove_if([this](param **a) { return has_previously_tested(a); });
+  return local_param_cache;
 }
 
 void Ipog::run() {
   init_bound();
   for (auto k = t_; k < input_params_.size(); k++) {
-    std::forward_list<std::vector<param*>> pi = cover(k);
+    std::forward_list<param**> pi;
+    param **params = cover(k, pi);
+    std::unique_ptr<param*[]> params_ptr(params);
 
     {
       auto prev = bound_.cbefore_begin();
@@ -103,8 +109,8 @@ void Ipog::run() {
 
     /* vertical extension */
     for (auto pairs = pi.cbegin(); pairs != pi.cend(); ++pairs) {
-      const std::vector<param*> &test_case = *pairs;
-      bool case_covered = constraint_handler->violate_constraints(test_case);
+      param **test_case = *pairs;
+      bool case_covered = constraint_handler->violate_constraints(test_case, t_);
 
       if(!case_covered) {
         for (auto it = unbound_.cbegin(); it != unbound_.cend(); ++it) {
@@ -123,8 +129,9 @@ void Ipog::run() {
 
           if (merge_result > 0) {
             dtest_case tmp = *next;
-            for (auto it = test_case.cbegin(); it != test_case.cend(); ++it) {
-              tmp[(*it)->first] = (*it)->second;
+            for(std::size_t i = 0; i < t_; i++) {
+              const param *it = test_case[i];
+              tmp[it->first] = it->second;
             }
             is_merged = true;
             break;
@@ -133,8 +140,9 @@ void Ipog::run() {
 
         if (!is_merged) {
           dtest_case unbound_test_case(param_cache_.size(), -1);
-          for (auto it = test_case.cbegin(); it != test_case.cend(); ++it) {
-            unbound_test_case[(*it)->first] = (*it)->second;
+          for(std::size_t i = 0; i < t_; i++) {
+            const param *it = test_case[i];
+            unbound_test_case[it->first] = it->second;
           }
           if (!constraint_handler->violate_constraints(unbound_test_case)) {
             unbound_.push_front(unbound_test_case);
@@ -148,18 +156,20 @@ void Ipog::run() {
 
 /* -1 no merge, 0 perfect merge (no unbound), 1 partial merge */
 inline const int Ipog::merge(const int k, dtest_case &test_case,
-    const std::vector<param*> &pairs) {
-  for (auto it = pairs.cbegin(); it != pairs.cend(); ++it) {
-    auto value = test_case[(*it)->first];
-    if (!(value == -1 || value == (*it)->second)) {
+    param** pairs) {
+  for(std::size_t i = 0; i < t_; i++) {
+    const param *it = pairs[i];
+    auto value = test_case[it->first];
+    if (!(value == -1 || value == it->second)) {
       return -1;
     }
   }
 
   std::copy(test_case.cbegin(), test_case.cend(), merge_scratch_.begin());
 
-  for (auto it = pairs.cbegin(); it != pairs.cend(); ++it) {
-    merge_scratch_[(*it)->first] = (*it)->second;
+  for(std::size_t i = 0; i < t_; i++) {
+    const param *it = pairs[i];
+    merge_scratch_[it->first] = it->second;
   }
 
   if (constraint_handler->violate_constraints(merge_scratch_)) {
@@ -176,6 +186,16 @@ inline const int Ipog::merge(const int k, dtest_case &test_case,
 }
 
 inline bool Ipog::is_covered(const dtest_case &test_case,
+    param** params) {
+  for(std::size_t i = 0; i < t_; i++) {
+    const param *my_param = params[i];
+    if (test_case[my_param->first] != my_param->second) {
+      return false;
+    }
+  }
+  return true;
+}
+inline bool Ipog::is_covered(const dtest_case &test_case,
     const std::vector<param*> &params) {
   for (auto param = params.cbegin(); param != params.cend(); ++param) {
     if (test_case[(*param)->first] != (*param)->second) {
@@ -185,15 +205,15 @@ inline bool Ipog::is_covered(const dtest_case &test_case,
   return true;
 }
 
-const int Ipog::maximize_coverage(const int k, dtest_case &test_case,
-    std::forward_list<std::vector<param*>> &pi) {
+inline const int Ipog::maximize_coverage(const int k, dtest_case &test_case,
+    std::forward_list<param**> &pi) {
   const std::vector<param> &param_range = param_cache_[k];
   int current_max = -1;
   param max_param = param_range[0];
-  std::forward_list<std::forward_list<std::vector<param*>>::iterator> covered;
+  std::forward_list<std::forward_list<param**>::iterator> covered;
 
   for (auto it = param_range.cbegin(); it != param_range.cend(); ++it) {
-    std::forward_list<std::forward_list<std::vector<param*>>::iterator>
+    std::forward_list<std::forward_list<param**>::iterator>
       tmp_covered;
     const param current_param = *it;
 
@@ -201,12 +221,11 @@ const int Ipog::maximize_coverage(const int k, dtest_case &test_case,
     if (!constraint_handler->violate_constraints(test_case)) {
       int count = 0;
       auto prev = pi.before_begin();
-      for (auto params = pi.cbegin(); params != pi.cend(); ++params) {
+      for (auto params = pi.begin(); params != pi.end(); ++params, ++prev) {
         if (is_covered(test_case, *params)) {
           tmp_covered.push_front(prev);
           count++;
         }
-        ++prev;
       }
 
       if (count > current_max) {
@@ -365,7 +384,7 @@ std::string *Ipog::header() {
     constraints.push_back(tmp);
   }
 
-void Ipog::ground_solutions() {
+inline void Ipog::ground_solutions() {
 	std::size_t solution_count = 0;
   std::vector<dval> transform_scratch(param_cache_.size(), 0);
 
@@ -417,6 +436,23 @@ void Ipog::add_previously_tested(const int values[], const std::size_t length) {
       bool flag = true;
       for(auto iit = test_case.cbegin(); iit != test_case.cend(); ++iit) {
         if((*it)[(*iit)->first] != (*iit)->second) {
+          flag = false;
+          break;
+        }
+      }
+      if(flag) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  inline bool Ipog::has_previously_tested(param **params) {
+    for(auto it = previously_tested_.cbegin(); it != previously_tested_.cend(); ++it) {
+      bool flag = true;
+      for(std::size_t i = 0; i < t_; i++) {
+        const param *iit = params[i];
+        if((*it)[iit->first] != iit->second) {
           flag = false;
           break;
         }

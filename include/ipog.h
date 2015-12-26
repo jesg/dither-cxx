@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <string>
 #include <unordered_map>
+#include <memory>
 #include "combinations.h"
 #include "dither_types.h"
 #include "base_constraint_handler.h"
@@ -55,6 +56,7 @@ class Ipog {
   inline bool has_previously_tested(std::vector<param*>& test_case);
   inline bool has_previously_tested(dtest_case& test_case);
   inline bool has_previously_tested(const int, dtest_case& test_case);
+  inline bool has_previously_tested(param **params);
 
  public:
   Ipog();
@@ -71,15 +73,18 @@ class Ipog {
   std::string *header();
   inline void ground_solutions();
   inline bool is_valid() { return t_ <= param_cache_.size(); }
-  inline std::forward_list<std::vector<param*>> cover(int);
+  inline param** cover(int,std::forward_list<param**>&);
   inline const int maximize_coverage(const int, dtest_case &,
-                              std::forward_list<std::vector<param*>> &);
+                              std::forward_list<param**> &);
   void add_constraint(const int[], const unsigned int);
 	void add_previously_tested(const int[], const std::size_t);
   inline bool is_covered(const dtest_case &test_case,
+                         param** params);
+  inline bool is_covered(const param** params);
+  inline bool is_covered(const dtest_case &test_case,
                          const std::vector<param*> &params);
   inline bool is_covered(const std::vector<param> &params);
-  inline const int merge(const int, dtest_case &, const std::vector<param*> &);
+  inline const int merge(const int, dtest_case &, param**);
   void display_raw_solution();
   void fill(int[]);
   inline void display_header() {

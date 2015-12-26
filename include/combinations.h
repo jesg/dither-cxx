@@ -12,6 +12,8 @@
 
 #include <vector>
 #include <forward_list>
+#include <algorithm>
+#include <memory>
 #include "dither_types.h"
 
 namespace dither {
@@ -157,30 +159,37 @@ inline void product3(
   }
 }
 
-inline void product4(
-    std::forward_list<std::vector<param*>>& results,
+inline std::size_t product4(
+    std::forward_list<param**>& results,
+    param** param_cache,
     std::vector<std::vector<param>*>& param_matrix) {
   std::vector<int> ranges;
-  std::vector<param*> scratch;
-  for(auto params : param_matrix) {
-    ranges.push_back(params->size() - 1);
-    scratch.push_back(&(*params)[0]);
+  std::unique_ptr<param*[]> scratch_ptr(new param*[param_matrix.size()]);
+  auto scratch = scratch_ptr.get();
+  for(std::size_t j = 0; j < param_matrix.size(); j++) {
+    ranges.push_back(param_matrix[j]->size() - 1);
+    scratch[j] = &(*param_matrix[j])[0];
   }
-  std::vector<int> indexes(scratch.size(), 0);
+  std::vector<int> indexes(ranges.size(), 0);
 
   const std::size_t max = ranges.size() - 1;
+  const std::size_t length = ranges.size();
+	std::size_t j = 0;
   for(std::size_t i = max;;) {
 
     if(i == max) {
       for(std::size_t val = 0; val <= ranges[i]; val++) {
         scratch[i] = &(*param_matrix[i])[indexes[i]];
-        results.push_front(scratch);
+        std::copy(scratch, scratch+length, param_cache);
+        results.push_front(param_cache);
+        param_cache += length;
         indexes[i]++;
+				j++;
       }
       indexes[i] = 0;
       i--;
     } else if(i == 0 && indexes[i] >= ranges[i]) {
-      return;
+      return j;
     } else if(indexes[i] < ranges[i]) {
       indexes[i]++;
       scratch[i] = &(*param_matrix[i])[indexes[i]];

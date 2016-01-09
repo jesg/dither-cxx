@@ -9,7 +9,9 @@
 
 #include "dither.h"
 
-ipog_handle dither_ipog_new(const unsigned int t) { return new dither::Ipog(t); }
+ipog_handle dither_ipog_new(const unsigned int t) {
+  return new dither::Ipog(t);
+}
 
 void dither_ipog_delete(ipog_handle self) {
   delete static_cast<dither::Ipog *>(self);
@@ -38,10 +40,12 @@ void dither_ipog_fill(ipog_handle self, int *solution) {
   static_cast<dither::Ipog *>(self)->fill(solution);
 }
 
-void dither_ipog_add_constraint(ipog_handle self, const int constraint[], const int length) {
+void dither_ipog_add_constraint(ipog_handle self, const int constraint[],
+                                const int length) {
   static_cast<dither::Ipog *>(self)->add_constraint(constraint, length);
 }
 
-void dither_ipog_add_previously_tested(ipog_handle self, const int tested[], const int length) {
+void dither_ipog_add_previously_tested(ipog_handle self, const int tested[],
+                                       const int length) {
   static_cast<dither::Ipog *>(self)->add_previously_tested(tested, length);
 }

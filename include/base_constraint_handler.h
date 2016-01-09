@@ -15,25 +15,28 @@
 
 namespace dither {
 
-  class BaseConstraintHandler {
-    public:
-      BaseConstraintHandler(){};
-      virtual ~BaseConstraintHandler(){};
-      virtual bool violate_constraints(const dtest_case &test_case) { return false; }
-      virtual bool violate_constraints(const std::vector<param*> &test_case) {
-        return false;
+class BaseConstraintHandler {
+ public:
+  BaseConstraintHandler(){};
+  virtual ~BaseConstraintHandler(){};
+  virtual bool violate_constraints(const dtest_case &test_case) {
+    return false;
+  }
+  virtual bool violate_constraints(const std::vector<param *> &test_case) {
+    return false;
+  }
+  virtual bool violate_constraints(param **test_case,
+                                   const std::size_t length) {
+    return false;
+  }
+  virtual bool ground(dtest_case &test_case) {
+    for (auto it = test_case.begin(); it != test_case.end(); ++it) {
+      if ((*it) == -1) {
+        *it = 0;
       }
-      virtual bool violate_constraints(param** test_case, const std::size_t length) {
-        return false;
-      }
-      virtual bool ground(dtest_case &test_case) {
-        for (auto it = test_case.begin(); it != test_case.end(); ++it) {
-          if ((*it) == -1) {
-            *it = 0;
-          }
-        }
-        return true;
-      }
-  };
+    }
+    return true;
+  }
+};
 }
 #endif  // BASE_CONSTRAINT_HANDLER_H_

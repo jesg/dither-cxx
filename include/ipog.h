@@ -39,23 +39,24 @@ class Ipog {
   std::unordered_map<std::string, int> param_index_;
   std::unordered_map<int, std::string> reverse_param_index_;
   dtest_case merge_scratch_;
-  BaseConstraintHandler* constraint_handler;
+  BaseConstraintHandler *constraint_handler;
   std::vector<std::vector<dval>> constraints;
   std::vector<dval> ranges;
-	std::size_t solution_size;
-	std::vector<std::vector<dval>> original_previously_tested_;
-	std::vector<std::vector<dval>> previously_tested_;
+  std::size_t solution_size;
+  std::vector<std::vector<dval>> original_previously_tested_;
+  std::vector<std::vector<dval>> previously_tested_;
 
-  inline void transform(std::vector<dval>& scratch, std::vector<dval>& test_case) {
-    for(std::size_t i = 0; i < test_case.size(); i++) {
+  inline void transform(std::vector<dval> &scratch,
+                        std::vector<dval> &test_case) {
+    for (std::size_t i = 0; i < test_case.size(); i++) {
       scratch[ordered_param_index_[i]] = test_case[i];
     }
     std::copy(scratch.cbegin(), scratch.cend(), test_case.begin());
   }
 
-  inline bool has_previously_tested(std::vector<param*>& test_case);
-  inline bool has_previously_tested(dtest_case& test_case);
-  inline bool has_previously_tested(const int, dtest_case& test_case);
+  inline bool has_previously_tested(std::vector<param *> &test_case);
+  inline bool has_previously_tested(dtest_case &test_case);
+  inline bool has_previously_tested(const int, dtest_case &test_case);
   inline bool has_previously_tested(param **params);
 
  public:
@@ -64,7 +65,8 @@ class Ipog {
   Ipog(const unsigned int);
   void set_t(const unsigned int t) { t_ = t; }
   void add_parameter(const std::string, const int[], const unsigned int);
-  void add_parameter(const std::string, const std::string[], const unsigned int);
+  void add_parameter(const std::string, const std::string[],
+                     const unsigned int);
   void add_parameter(const std::string);
   void init_bound();
   void init_param_cache();
@@ -73,18 +75,17 @@ class Ipog {
   std::string *header();
   inline void ground_solutions();
   inline bool is_valid() { return t_ <= param_cache_.size(); }
-  inline param** cover(int,std::forward_list<param**>&);
+  inline param **cover(int, std::forward_list<param **> &);
   inline const int maximize_coverage(const int, dtest_case &,
-                              std::forward_list<param**> &);
+                                     std::forward_list<param **> &);
   void add_constraint(const int[], const unsigned int);
-	void add_previously_tested(const int[], const std::size_t);
+  void add_previously_tested(const int[], const std::size_t);
+  inline bool is_covered(const dtest_case &test_case, param **params);
+  inline bool is_covered(const param **params);
   inline bool is_covered(const dtest_case &test_case,
-                         param** params);
-  inline bool is_covered(const param** params);
-  inline bool is_covered(const dtest_case &test_case,
-                         const std::vector<param*> &params);
+                         const std::vector<param *> &params);
   inline bool is_covered(const std::vector<param> &params);
-  inline const int merge(const int, dtest_case &, param**);
+  inline const int merge(const int, dtest_case &, param **);
   void display_raw_solution();
   void fill(int[]);
   inline void display_header() {
@@ -107,7 +108,8 @@ class Ipog {
         }
         continue;
       }
-      const param my_param = param_cache_[reverse_ordered_param_index_[i]][value];
+      const param my_param =
+          param_cache_[reverse_ordered_param_index_[i]][value];
       switch (my_param.type) {
         case DITHER_INT_T:
           std::cout << int_params_[my_param.name][my_param.second];
@@ -127,7 +129,6 @@ class Ipog {
     std::cout << std::endl;
   }
 };
-
 }
 
 #endif

@@ -125,12 +125,11 @@ inline void product(
   }
 }
 
-inline void product3(
-    std::forward_list<dtest_case>& results,
-    std::vector<dtest_case>::const_iterator begin,
-    std::vector<dtest_case>::const_iterator end) {
+inline void product3(std::forward_list<dtest_case>& results,
+                     std::vector<dtest_case>::const_iterator begin,
+                     std::vector<dtest_case>::const_iterator end) {
   dtest_case ranges;
-  for(auto it = begin; it != end; ++it) {
+  for (auto it = begin; it != end; ++it) {
     const dval tmp = (*it).size() - 1;
     ranges.push_back(tmp);
   }
@@ -138,18 +137,17 @@ inline void product3(
   dtest_case scratch(ranges.size(), 0);
 
   const std::size_t max = ranges.size() - 1;
-  for(std::size_t i = max;;) {
-
-    if(i == max) {
-      for(dval val = 0; val <= ranges[i]; val++) {
+  for (std::size_t i = max;;) {
+    if (i == max) {
+      for (dval val = 0; val <= ranges[i]; val++) {
         results.push_front(scratch);
         scratch[i]++;
       }
       scratch[i] = 0;
       i--;
-    } else if(i == 0 && scratch[i] >= ranges[i]) {
+    } else if (i == 0 && scratch[i] >= ranges[i]) {
       return;
-    } else if(scratch[i] < ranges[i]) {
+    } else if (scratch[i] < ranges[i]) {
       scratch[i]++;
       i++;
     } else {
@@ -159,14 +157,13 @@ inline void product3(
   }
 }
 
-inline std::size_t product4(
-    std::forward_list<param**>& results,
-    param** param_cache,
-    std::vector<std::vector<param>*>& param_matrix) {
+inline std::size_t product4(std::forward_list<param**>& results,
+                            param** param_cache,
+                            std::vector<std::vector<param>*>& param_matrix) {
   std::vector<int> ranges;
-  std::unique_ptr<param*[]> scratch_ptr(new param*[param_matrix.size()]);
+  std::unique_ptr<param* []> scratch_ptr(new param*[param_matrix.size()]);
   auto scratch = scratch_ptr.get();
-  for(std::size_t j = 0; j < param_matrix.size(); j++) {
+  for (std::size_t j = 0; j < param_matrix.size(); j++) {
     ranges.push_back(param_matrix[j]->size() - 1);
     scratch[j] = &(*param_matrix[j])[0];
   }
@@ -174,23 +171,22 @@ inline std::size_t product4(
 
   const std::size_t max = ranges.size() - 1;
   const std::size_t length = ranges.size();
-	std::size_t j = 0;
-  for(std::size_t i = max;;) {
-
-    if(i == max) {
-      for(std::size_t val = 0; val <= ranges[i]; val++) {
+  std::size_t j = 0;
+  for (std::size_t i = max;;) {
+    if (i == max) {
+      for (std::size_t val = 0; val <= ranges[i]; val++) {
         scratch[i] = &(*param_matrix[i])[indexes[i]];
-        std::copy(scratch, scratch+length, param_cache);
+        std::copy(scratch, scratch + length, param_cache);
         results.push_front(param_cache);
         param_cache += length;
         indexes[i]++;
-				j++;
+        j++;
       }
       indexes[i] = 0;
       i--;
-    } else if(i == 0 && indexes[i] >= ranges[i]) {
+    } else if (i == 0 && indexes[i] >= ranges[i]) {
       return j;
-    } else if(indexes[i] < ranges[i]) {
+    } else if (indexes[i] < ranges[i]) {
       indexes[i]++;
       scratch[i] = &(*param_matrix[i])[indexes[i]];
       i++;

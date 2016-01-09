@@ -27,7 +27,7 @@ TEST(ConstraintTest, canValidateGecodeConstraintOnTestCase) {
   std::vector<std::vector<int>> constraints;
   std::vector<int> tmp;
   int constraint[] = {-1, 0, 0, -1};
-  for(unsigned int i = 0; i < 4; i++) {
+  for (unsigned int i = 0; i < 4; i++) {
     tmp.push_back(constraint[i]);
   }
   constraints.push_back(tmp);
@@ -41,7 +41,6 @@ TEST(ConstraintTest, canValidateGecodeConstraintOnTestCase) {
   dcase[1] = 0;
   dcase[2] = 0;
   ASSERT_TRUE(handler.violate_constraints(dcase));
-
 }
 
 TEST(ConstraintTest, canValidateGecodeConstraintOnParams) {
@@ -53,7 +52,7 @@ TEST(ConstraintTest, canValidateGecodeConstraintOnParams) {
   std::vector<std::vector<int>> constraints;
   std::vector<int> tmp;
   int constraint[] = {-1, 0, 0, -1};
-  for(unsigned int i = 0; i < 4; i++) {
+  for (unsigned int i = 0; i < 4; i++) {
     tmp.push_back(constraint[i]);
   }
   constraints.push_back(tmp);
@@ -98,7 +97,7 @@ TEST(ConstraintTest, canGroundGecodeConstraintOnTestCase) {
   int constraint2[] = {-1, 0, -1, -1};
   int constraint3[] = {-1, -1, 0, 0};
   int constraint4[] = {-1, -1, 0, 1};
-  for(unsigned int i = 0; i < 4; i++) {
+  for (unsigned int i = 0; i < 4; i++) {
     tmp.push_back(constraint[i]);
     tmp2.push_back(constraint2[i]);
     tmp3.push_back(constraint3[i]);

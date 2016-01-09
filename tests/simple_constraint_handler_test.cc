@@ -20,7 +20,7 @@ TEST(SimpleConstraintHandlerTest, canCreate) {
   std::vector<std::vector<dither::dval>> constraints;
   dither::dval constraint[] = {-1, 0, 0, -1};
   std::vector<dither::dval> tmp;
-  for(unsigned int i = 0; i < 4; i++) {
+  for (unsigned int i = 0; i < 4; i++) {
     tmp.push_back(constraint[i]);
   }
   constraints.push_back(tmp);
@@ -38,7 +38,7 @@ TEST(SimpleConstraintHandlerTest, canTestCaseViolateConstraint) {
   dither::dval constraint2[] = {-1, 0, 0, 0};
   std::vector<dither::dval> tmp;
   std::vector<dither::dval> tmp2;
-  for(unsigned int i = 0; i < 4; i++) {
+  for (unsigned int i = 0; i < 4; i++) {
     tmp.push_back(constraint[i]);
     tmp2.push_back(constraint2[i]);
   }
@@ -70,7 +70,7 @@ TEST(SimpleConstraintHandlerTest, canParamsViolateConstraint) {
   dither::dval constraint2[] = {-1, 0, 0, 0};
   std::vector<dither::dval> tmp;
   std::vector<dither::dval> tmp2;
-  for(unsigned int i = 0; i < 4; i++) {
+  for (unsigned int i = 0; i < 4; i++) {
     tmp.push_back(constraint[i]);
     tmp2.push_back(constraint2[i]);
   }
@@ -110,7 +110,7 @@ TEST(SimpleConstraintHandlerTest, canGroundTestCase) {
   std::vector<dither::dval> tmp2;
   std::vector<dither::dval> tmp3;
   std::vector<dither::dval> tmp4;
-  for(unsigned int i = 0; i < 4; i++) {
+  for (unsigned int i = 0; i < 4; i++) {
     tmp.push_back(constraint[i]);
     tmp2.push_back(constraint2[i]);
     tmp3.push_back(constraint3[i]);
@@ -142,7 +142,6 @@ TEST(SimpleConstraintHandlerTest, canGroundTestCase) {
   ASSERT_TRUE(handler.ground(test_case3));
 }
 
-
 TEST(GecodeCompatibilityConstraintTest, canValidateGecodeConstraintOnTestCase) {
   std::vector<dither::dval> arr;
   arr.push_back(2);
@@ -152,7 +151,7 @@ TEST(GecodeCompatibilityConstraintTest, canValidateGecodeConstraintOnTestCase) {
   std::vector<std::vector<dither::dval>> constraints;
   std::vector<dither::dval> tmp;
   int constraint[] = {-1, 0, 0, -1};
-  for(unsigned int i = 0; i < 4; i++) {
+  for (unsigned int i = 0; i < 4; i++) {
     tmp.push_back(constraint[i]);
   }
   constraints.push_back(tmp);
@@ -167,7 +166,6 @@ TEST(GecodeCompatibilityConstraintTest, canValidateGecodeConstraintOnTestCase) {
   dcase[1] = 0;
   dcase[2] = 0;
   ASSERT_TRUE(handler.violate_constraints(dcase));
-
 }
 
 TEST(GecodeCompatibilityConstraintTest, canValidateGecodeConstraintOnParams) {
@@ -179,7 +177,7 @@ TEST(GecodeCompatibilityConstraintTest, canValidateGecodeConstraintOnParams) {
   std::vector<std::vector<dither::dval>> constraints;
   std::vector<dither::dval> tmp;
   int constraint[] = {-1, 0, 0, -1};
-  for(unsigned int i = 0; i < 4; i++) {
+  for (unsigned int i = 0; i < 4; i++) {
     tmp.push_back(constraint[i]);
   }
   constraints.push_back(tmp);
@@ -231,7 +229,7 @@ TEST(GecodeCompatibilityConstraintTest, canGroundSimpleConstraintOnTestCase) {
   int constraint4[] = {-1, -1, 0, 1, -1};
   int constraint5[] = {-1, -1, 0, -1, 0};
   int constraint6[] = {-1, -1, 0, -1, 1};
-  for(unsigned int i = 0; i < 5; i++) {
+  for (unsigned int i = 0; i < 5; i++) {
     tmp.push_back(constraint[i]);
     tmp2.push_back(constraint2[i]);
     tmp3.push_back(constraint3[i]);

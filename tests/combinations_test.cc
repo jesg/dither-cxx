@@ -14,15 +14,14 @@
 
 /* product3 should be ~10% faster than product */
 TEST(CombinationsTest, product3BackwardsCompatible) {
-
   int arr[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-  dither::dtest_case case1(arr, arr+5);
-  dither::dtest_case case2(arr, arr+3);
-  dither::dtest_case case3(arr, arr+7);
-  dither::dtest_case case4(arr, arr+4);
-  dither::dtest_case case5(arr, arr+2);
-  dither::dtest_case case6(arr, arr+10);
+  dither::dtest_case case1(arr, arr + 5);
+  dither::dtest_case case2(arr, arr + 3);
+  dither::dtest_case case3(arr, arr + 7);
+  dither::dtest_case case4(arr, arr + 4);
+  dither::dtest_case case5(arr, arr + 2);
+  dither::dtest_case case6(arr, arr + 10);
 
   std::vector<dither::dtest_case> cases;
   cases.push_back(case1);
@@ -40,6 +39,4 @@ TEST(CombinationsTest, product3BackwardsCompatible) {
   dither::product3(results2, cases.cbegin(), cases.cend());
 
   ASSERT_TRUE(std::equal(results.begin(), results.end(), results2.begin()));
-
-
 }

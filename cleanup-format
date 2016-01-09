@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+git ls-files | grep -e '\.h$' -e '\.cc$'  | xargs clang-format -i -style=google "$@"

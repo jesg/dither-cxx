@@ -26,8 +26,8 @@ SimpleConstraintHandler::SimpleConstraintHandler(
     constraints.push_back(constraint);
   }
   std::sort(constraints.begin(), constraints.end(),
-            [](std::vector<std::pair<std::size_t, dval>>& a,
-               std::vector<std::pair<std::size_t, dval>>& b) {
+            [](const std::vector<std::pair<std::size_t, dval>>& a,
+               const std::vector<std::pair<std::size_t, dval>>& b) {
               return a.size() < b.size();
             });
 }

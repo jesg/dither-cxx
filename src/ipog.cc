@@ -122,28 +122,49 @@ void Ipog::run() {
 
       if (!case_covered) {
         bool is_merged = false;
-        auto prev = unbound_.before_begin();
-        auto next = unbound_.begin();
-        auto end = unbound_.end();
-        while (next != end) {
-          const int merge_result = merge(k, *next, test_case);
-
-          if (merge_result >= 0) {
-            for (std::size_t i = 0; i < t_; i++) {
-              const param *it = test_case[i];
-              (*next)[it->first] = it->second;
+        const int max_merge_possible = k - t_;
+        int current_max = -1;
+        std::size_t max_index;
+        std::size_t index = 0;
+        for (auto it = unbound_.begin(); it != unbound_.end(); ++it, ++index) {
+          const int merge_result = merge(k, *it, test_case);
+          if (merge_result > current_max) {
+            max_index = index;
+            current_max = merge_result;
+            if (merge_result == max_merge_possible) {
+              break;
             }
-            is_merged = true;
           }
-          if (merge_result == 0) {
-            bound_.push_front(*next);
-            unbound_.erase_after(prev);
-            break;
-          } else if (merge_result == 1) {
-            break;
+        }
+        if (current_max >= 0) {
+          is_merged = true;
+          index = 0;
+          auto prev = unbound_.before_begin();
+          auto next = unbound_.begin();
+          auto end = unbound_.end();
+          while (next != end) {
+            if (max_index <= index) {
+              const int merge_result = merge(k, *next, test_case);
+
+              if (merge_result >= 0) {
+                for (std::size_t i = 0; i < t_; i++) {
+                  const param *it = test_case[i];
+                  (*next)[it->first] = it->second;
+                }
+                is_merged = true;
+              }
+              if (merge_result == 0) {
+                bound_.push_front(*next);
+                unbound_.erase_after(prev);
+                break;
+              } else if (merge_result >= 1) {
+                break;
+              }
+            }
+            ++index;
+            ++prev;
+            ++next;
           }
-          ++prev;
-          ++next;
         }
 
         if (!is_merged) {
@@ -185,13 +206,14 @@ inline const int Ipog::merge(const int k, dtest_case &test_case,
     return -1;
   }
 
+  int count = 0;
   for (auto i = 0; i <= k; i++) {
     if (merge_scratch_[i] == -1) {
-      return 1;
+      count++;
     }
   }
 
-  return 0;
+  return count;
 }
 
 inline bool Ipog::is_covered(const dtest_case &test_case, param **params) {

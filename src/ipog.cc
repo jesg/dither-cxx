@@ -206,32 +206,39 @@ inline bool Ipog::is_covered(const dtest_case &test_case,
 inline const int Ipog::maximize_coverage(const int k, dtest_case &test_case,
                                          std::forward_list<param **> &pi) {
   const std::vector<param> &param_range = param_cache_[k];
-  int current_max = -1;
-  param max_param = param_range[0];
-  std::forward_list<std::forward_list<param **>::iterator> covered;
+  std::vector<std::forward_list<std::forward_list<param **>::iterator>> covered(
+      param_range.size());
+  std::vector<int> counts(param_range.size());
+  const std::size_t index = param_range[0].first;
+  std::vector<std::size_t> valid_indexes;
+  valid_indexes.reserve(counts.size());
+  for (std::size_t i = 0; i < counts.size(); i++) {
+    test_case[index] = param_range[i].second;
+    if (constraint_handler->violate_constraints(test_case)) {
+      counts[i] = -1;
+    } else {
+      valid_indexes.push_back(i);
+    }
+  }
 
-  for (auto it = param_range.cbegin(); it != param_range.cend(); ++it) {
-    std::forward_list<std::forward_list<param **>::iterator> tmp_covered;
-    const param current_param = *it;
-
-    test_case[current_param.first] = current_param.second;
-    if (!constraint_handler->violate_constraints(test_case)) {
-      int count = 0;
-      auto prev = pi.before_begin();
-      for (auto params = pi.begin(); params != pi.end(); ++params, ++prev) {
-        if (is_covered(test_case, *params)) {
-          tmp_covered.push_front(prev);
-          count++;
-        }
-      }
-
-      if (count > current_max) {
-        current_max = count;
-        max_param = current_param;
-        covered = tmp_covered;
+  auto prev = pi.before_begin();
+  for (auto params = pi.begin(); params != pi.end(); ++params, ++prev) {
+    for (auto i : valid_indexes) {
+      test_case[index] = param_range[i].second;
+      if (is_covered(test_case, *params)) {
+        covered[i].push_front(prev);
+        ++counts[i];
       }
     }
-    test_case[current_param.first] = -1;
+  }
+
+  int current_max = -1;
+  std::size_t max_index = 0;
+  for (auto i : valid_indexes) {
+    if (current_max < counts[i]) {
+      current_max = counts[i];
+      max_index = i;
+    }
   }
 
   if (current_max == -1) {
@@ -239,11 +246,12 @@ inline const int Ipog::maximize_coverage(const int k, dtest_case &test_case,
   }
 
   /* remove covered */
-  for (auto it = covered.begin(); it != covered.end(); ++it) {
+  for (auto it = covered[max_index].begin(); it != covered[max_index].end();
+       ++it) {
     pi.erase_after(*it);
   }
 
-  test_case[max_param.first] = max_param.second;
+  test_case[index] = param_range[max_index].second;
   return current_max;
 }
 

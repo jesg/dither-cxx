@@ -122,8 +122,10 @@ void Ipog::run() {
 
       if (!case_covered) {
         bool is_merged = false;
-
-        for (auto next = unbound_.begin(); next != unbound_.end(); ++next) {
+        auto prev = unbound_.before_begin();
+        auto next = unbound_.begin();
+        auto end = unbound_.end();
+        while (next != end) {
           const int merge_result = merge(k, *next, test_case);
 
           if (merge_result >= 0) {
@@ -132,8 +134,16 @@ void Ipog::run() {
               (*next)[it->first] = it->second;
             }
             is_merged = true;
+          }
+          if (merge_result == 0) {
+            bound_.push_front(*next);
+            unbound_.erase_after(prev);
+            break;
+          } else if (merge_result == 1) {
             break;
           }
+          ++prev;
+          ++next;
         }
 
         if (!is_merged) {

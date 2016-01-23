@@ -121,7 +121,7 @@ TEST(IpogTest, 4Way10) {
 
   dither_ipog_run(ipog);
   std::cout << dither_ipog_size(ipog) << std::endl;
-  ASSERT_EQ(dither_ipog_size(ipog), 2141);
+  ASSERT_EQ(dither_ipog_size(ipog), 1964);
   dither_ipog_delete(ipog);
 }
 
@@ -134,6 +134,6 @@ TEST(IpogTest, 2WayLargeValue) {
 
   dither_ipog_run(ipog);
   std::cout << dither_ipog_size(ipog) << std::endl;
-  ASSERT_EQ(dither_ipog_size(ipog), 4489);
+  ASSERT_EQ(dither_ipog_size(ipog), 4055);
   dither_ipog_delete(ipog);
 }

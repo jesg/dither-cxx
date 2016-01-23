@@ -121,19 +121,19 @@ TEST(IpogTest, 4Way10) {
 
   dither_ipog_run(ipog);
   std::cout << dither_ipog_size(ipog) << std::endl;
-  ASSERT_EQ(dither_ipog_size(ipog), 1168);
+  ASSERT_EQ(dither_ipog_size(ipog), 2141);
   dither_ipog_delete(ipog);
 }
 
 TEST(IpogTest, 2WayLargeValue) {
   ipog_handle ipog = dither_ipog_new(4);
-  int vals[] = {0, 1, 2, 3, 4, 5};
+  int vals[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   for (unsigned int i = 0; i < 10; i++) {
     dither_ipog_add_parameter_int(ipog, i, vals, 6);
   }
 
   dither_ipog_run(ipog);
   std::cout << dither_ipog_size(ipog) << std::endl;
-  ASSERT_EQ(dither_ipog_size(ipog), 2369);
+  ASSERT_EQ(dither_ipog_size(ipog), 4489);
   dither_ipog_delete(ipog);
 }

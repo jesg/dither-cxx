@@ -126,11 +126,10 @@ void Ipog::run() {
         for (auto next = unbound_.begin(); next != unbound_.end(); ++next) {
           const int merge_result = merge(k, *next, test_case);
 
-          if (merge_result > 0) {
-            dtest_case tmp = *next;
+          if (merge_result >= 0) {
             for (std::size_t i = 0; i < t_; i++) {
               const param *it = test_case[i];
-              tmp[it->first] = it->second;
+              (*next)[it->first] = it->second;
             }
             is_merged = true;
             break;
@@ -150,6 +149,7 @@ void Ipog::run() {
       }
     }
   }
+
   ground_solutions();
 }
 

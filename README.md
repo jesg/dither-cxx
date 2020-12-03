@@ -24,6 +24,7 @@ If you want to build dither as a dynamic library, use:
     cmake --build . --target dither dither_test
     cmake --build . --target run_unit_tests
 
+After building, all executables, static and shared libraries can be found under `build/bin`.
 # TODO
 
 * evaluate gecode or YAP (Yet Another Prolog) for constraint handling (abandonded)

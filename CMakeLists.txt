@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 project (dither VERSION 0.1.1)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-find_package(Gecode 6.0 REQUIRED COMPONENTS Driver Int Kernel Minimodel Search Set Support)
+add_subdirectory(ext/gecode)
 add_subdirectory(ext/googletest)
 
 add_subdirectory(src)

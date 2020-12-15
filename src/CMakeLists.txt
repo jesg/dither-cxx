@@ -1,7 +1,14 @@
-project (dither)# The version number.
 
-include_directories (${PROJECT_SOURCE_DIR}/../include)
-include_directories(${GECODE_INCLUDE_DIRS})
 
-add_library(dither SHARED dither.cc ipog.cc simple_constraint_handler.cc)
-target_link_libraries(dither ${GECODE_LIBRARIES})
+add_library(dither)
+
+target_sources(dither PRIVATE dither.cc ipog.cc simple_constraint_handler.cc)
+target_include_directories(dither PUBLIC ${CMAKE_SOURCE_DIR}/include)
+
+target_link_libraries(dither PUBLIC gecodedriver gecodeint gecodekernel gecodeminimodel gecodesearch gecodeset gecodesupport)
+if (MSVC)
+  target_compile_options(dither PRIVATE /wd4267)
+endif()
+set_target_properties(dither PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set_target_properties(dither PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set_target_properties(dither PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

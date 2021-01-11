@@ -10,7 +10,6 @@
 #include <gtest/gtest.h>
 #include "dither.h"
 #include "dither_types.h"
-#include <gecode/int.hh>
 #include <iostream>
 #include <vector>
 #include <string>

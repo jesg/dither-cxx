@@ -5,7 +5,6 @@ add_library(dither)
 target_sources(dither PRIVATE dither.cc ipog.cc simple_constraint_handler.cc)
 target_include_directories(dither PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
-target_link_libraries(dither PUBLIC gecodedriver gecodeint gecodekernel gecodeminimodel gecodesearch gecodeset gecodesupport)
 if (MSVC)
   target_compile_options(dither PRIVATE /wd4267)
 endif()

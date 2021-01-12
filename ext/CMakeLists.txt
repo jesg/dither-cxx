@@ -1,6 +1,5 @@
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-add_subdirectory(gecode)
 add_subdirectory(googletest)
 
 # gtest needs extra treatment....

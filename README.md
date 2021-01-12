@@ -3,7 +3,7 @@
 Dither-cxx is a C++11 library that implements IPOG.
 
 # How to build / test
-This repository is self-contained, with dependencies on gecode and googletest handled via git-submodules.
+This repository is self-contained, with dependencies on googletest handled via git-submodules.
 
     git clone ...
     git submodule update --init --recursive
@@ -26,16 +26,9 @@ If you want to build dither as a dynamic library, use:
 
 After building, all executables, static and shared libraries can be found under `build/bin`.
 # TODO
-
-* evaluate gecode or YAP (Yet Another Prolog) for constraint handling (abandonded)
-* try to optimize the merge in the vertical extension (done)
 * write a DSL in mercury, flex/bison, prolog, minizinc, or lua for command line interface
 * add benchmarks
-
-* replace git-submodule dependencies by conan
-* re-add constraint solving (interface seemed to have changed?)
 * Fix compiler warnings
-* Bump gecode version (4.4.0 -> 6.2.0)
 
 # Copyright
 BSD 3-Clause License
